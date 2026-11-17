@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alavanca Plataforma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* layout: cabeçalho fixo + telas por hash; vitrine em grade, área do aluno em duas colunas (trilha | aula) */
+  --bg:#F2F5F4; --surface:#FFFFFF; --ink:#10201F; --muted:#566866; --line:#D8E1DF; --soft:#E7EFED;
+  --brand:#0F3B3A; --brand-ink:#F2F7F6; --accent:#E8A12E; --accent-ink:#1F1402;
+  --good:#1D7F55; --warn:#A85A0C; --bad:#B3261E;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --r:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A1413; --surface:#11201E; --ink:#E6EFED; --muted:#98ADAA; --line:#223532; --soft:#172A27;
+    --brand:#0D2B29; --brand-ink:#EAF3F1; --accent:#F2B44C; --accent-ink:#1F1402;
+    --good:#4CC38A; --warn:#F0A04B; --bad:#F2867D; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A1413; --surface:#11201E; --ink:#E6EFED; --muted:#98ADAA; --line:#223532; --soft:#172A27;
+  --brand:#0D2B29; --brand-ink:#EAF3F1; --accent:#F2B44C; --accent-ink:#1F1402;
+  --good:#4CC38A; --warn:#F0A04B; --bad:#F2867D; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.12;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+img{max-width:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.muted{color:var(--muted)}
+.fine{font-size:.85rem;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:20px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font:800 1.25rem var(--display);text-decoration:none}
+.logo-mark{width:30px;height:30px;border-radius:8px;background:var(--brand);display:grid;place-items:center}
+.nav{display:flex;gap:4px;margin-left:12px}
+.nav a{text-decoration:none;padding:8px 12px;border-radius:999px;color:var(--muted);font-weight:600;font-size:.95rem}
+.nav a:hover{color:var(--ink);background:var(--soft)}
+.nav a.on{color:var(--ink);background:var(--soft)}
+.top-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.who{display:flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;font-size:.92rem;padding:4px 10px 4px 4px;border-radius:999px;border:1px solid var(--line)}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-size:.8rem}
+.top .menu-btn{display:none}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);padding:10px 16px;border-radius:999px;font-weight:600;cursor:pointer;text-decoration:none;font-size:.95rem;line-height:1.2;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn-accent:hover{filter:brightness(1.05);border-color:var(--accent)}
+.btn-dark{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn-ghost-light{background:transparent;border-color:rgba(255,255,255,.35);color:var(--brand-ink)}
+.btn-ghost-light:hover{border-color:var(--brand-ink)}
+.btn-lg{padding:14px 24px;font-size:1.05rem}
+.btn-sm{padding:6px 12px;font-size:.85rem}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn-danger{color:var(--bad)}
+.link{background:none;border:0;padding:0;color:var(--ink);text-decoration:underline;cursor:pointer;font-weight:600}
+
+/* hero */
+.hero{background:var(--brand);color:var(--brand-ink);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:auto -10% -60% 40%;height:120%;background:radial-gradient(closest-side,rgba(232,161,46,.22),transparent);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1.25fr .9fr;gap:48px;padding-top:64px;padding-bottom:64px;position:relative;z-index:1}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;font-weight:700;color:var(--accent)}
+.hero h1{font-size:clamp(2rem,4vw,3.1rem);margin:14px 0 18px;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lead{font-size:1.15rem;max-width:56ch;opacity:.9}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0 14px}
+.hero .fine{color:rgba(242,247,246,.7)}
+.path{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:22px;display:grid;gap:14px;align-self:center}
+.path h3{font-size:1.05rem;font-weight:700}
+.step{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start}
+.step b{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.1);font:800 1.1rem var(--display);color:var(--accent)}
+.step strong{display:block;font-weight:700}
+.step span{font-size:.92rem;opacity:.82}
+.strip{display:flex;gap:28px;flex-wrap:wrap;padding:18px 0;border-top:1px solid rgba(255,255,255,.12);position:relative;z-index:1}
+.strip div{font-size:.95rem;opacity:.9}
+.strip strong{font:800 1.5rem var(--display);color:var(--accent);margin-right:6px}
+
+/* sections */
+section.block{padding:64px 0}
+.sec-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:28px;flex-wrap:wrap}
+.sec-head h2{font-size:clamp(1.6rem,3vw,2.3rem)}
+.sec-head p{max-width:60ch;margin-top:8px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.how article{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px;display:grid;gap:10px;align-content:start}
+.how .n{font:800 2.4rem var(--display);color:var(--accent);line-height:1}
+.how h3{font-size:1.2rem}
+
+.earn-list{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.earn-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+.earn-card .body{padding:20px;display:grid;gap:12px;align-content:start}
+.flow{display:grid;gap:8px;font-size:.93rem}
+.flow div{display:grid;grid-template-columns:76px 1fr;gap:10px}
+.flow dt,.flow .k{font-weight:700;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:grid;grid-template-rows:auto 1fr;text-decoration:none;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--muted)}
+.card .body{padding:16px 18px 18px;display:grid;gap:8px;align-content:start}
+.card h3{font-size:1.15rem}
+.card .tag{font-size:.9rem;color:var(--muted)}
+.card .earn{font-size:.88rem;border-top:1px dashed var(--line);padding-top:10px;margin-top:4px}
+.card .earn b{color:var(--good)}
+.cover{position:relative;aspect-ratio:16/9;display:flex;align-items:flex-end;padding:14px;color:#fff;overflow:hidden}
+.cover svg{position:absolute;inset:0;width:100%;height:100%}
+.cover .ct{position:relative;font:800 1.25rem/1.1 var(--display);text-shadow:0 1px 10px rgba(0,0,0,.25);max-width:90%}
+.cover .chips{position:absolute;top:12px;left:12px;display:flex;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--soft);color:var(--ink);white-space:nowrap}
+.cover .chip{background:rgba(0,0,0,.35);color:#fff;backdrop-filter:blur(4px)}
+.pill-ok{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.pill-soon{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.cover .pill-ok{background:#1D7F55;color:#fff}
+.cover .pill-soon{background:rgba(0,0,0,.45);color:#FFD9A0}
+
+/* plans */
+.plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:860px}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px;display:grid;gap:14px;align-content:start;position:relative}
+.plan.best{border:2px solid var(--accent)}
+.plan .badge{position:absolute;top:-12px;right:20px;background:var(--accent);color:var(--accent-ink);font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:999px}
+.price{font:800 2.4rem var(--display)}
+.price small{font:500 1rem var(--body);color:var(--muted)}
+.checks{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.checks li{display:grid;grid-template-columns:20px 1fr;gap:8px;font-size:.95rem}
+.checks li::before{content:"";width:18px;height:18px;margin-top:3px;border-radius:50%;background:var(--good) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 11.2 3.3 8l1.1-1.1 2.1 2.1 5.1-5.1L12.7 5z' fill='white'/%3E%3C/svg%3E") center/13px no-repeat}
+.cont .cover .chips{display:none}
+
+.faq{display:grid;gap:10px;max-width:820px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.faq summary{cursor:pointer;font-weight:700}
+.faq details p{margin-top:10px;color:var(--muted)}
+
+.final-cta{background:var(--brand);color:var(--brand-ink);border-radius:24px;padding:40px;display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.final-cta h2{font-size:clamp(1.5rem,3vw,2.2rem);max-width:24ch}
+
+footer{border-top:1px solid var(--line);padding:32px 0 48px;margin-top:40px}
+footer .wrap{display:flex;gap:24px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+footer nav{display:flex;gap:16px;flex-wrap:wrap}
+footer a{color:var(--muted);text-decoration:none;font-size:.92rem}
+footer a:hover{color:var(--ink)}
+
+/* page header for inner views */
+.page-head{padding:40px 0 24px}
+.page-head h1{font-size:clamp(1.8rem,3.5vw,2.6rem)}
+.page-head p{margin-top:8px;max-width:64ch}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:24px}
+.search{flex:1 1 260px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 14px}
+.search input{border:0;background:transparent;padding:11px 0;flex:1;outline:none;min-width:0}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--ink);color:var(--bg)}
+select.input,input.input,textarea.input{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+select.input{width:auto}
+textarea.input{min-height:110px;resize:vertical;line-height:1.5}
+label.f{display:grid;gap:6px;font-weight:600;font-size:.9rem}
+label.f .hint{font-weight:400;color:var(--muted);font-size:.82rem}
+.empty{padding:40px;text-align:center;border:1px dashed var(--line);border-radius:var(--r);color:var(--muted)}
+
+/* item detail */
+.detail{display:grid;grid-template-columns:1.4fr .9fr;gap:32px;padding:32px 0 20px;align-items:start}
+.detail .cover{aspect-ratio:21/9;border-radius:20px}
+.detail .cover .ct{font-size:clamp(1.6rem,3.5vw,2.4rem)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;display:grid;gap:14px;align-content:start}
+.panel h3{font-size:1.1rem}
+.earn-box{border-left:4px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface));padding:16px 18px;border-radius:0 12px 12px 0}
+.earn-box .k{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--warn)}
+.meta{display:flex;gap:16px;flex-wrap:wrap;font-size:.92rem;color:var(--muted)}
+.modules{display:grid;gap:12px}
+.module{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.module h4{padding:14px 16px;font-size:1rem;background:var(--soft);display:flex;justify-content:space-between;gap:10px}
+.module ol{list-style:none;margin:0;padding:6px 0}
+.module li{display:grid;grid-template-columns:24px 1fr auto;gap:10px;padding:9px 16px;align-items:center;font-size:.95rem}
+.ico{width:18px;height:18px;display:inline-block;color:var(--muted)}
+.dl-row{display:flex;flex-wrap:wrap;gap:8px}
+
+/* apps page */
+.app-list{display:grid;gap:14px}
+.app-row{display:grid;grid-template-columns:72px 1fr auto;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.app-icon{width:72px;height:72px;border-radius:18px;overflow:hidden;position:relative}
+.app-icon svg{width:100%;height:100%;display:block}
+.app-row h3{font-size:1.1rem}
+.app-row .dl-row{justify-content:flex-end;max-width:420px}
+
+/* auth */
+.auth{display:grid;grid-template-columns:1fr 440px;gap:48px;padding:48px 0;align-items:center}
+.auth-side h1{font-size:clamp(1.8rem,3.5vw,2.6rem)}
+.auth-side ul{margin:20px 0 0;padding-left:18px;display:grid;gap:8px;color:var(--muted)}
+.auth-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px;display:grid;gap:16px}
+.auth-card form{display:grid;gap:12px}
+.prov{width:100%;justify-content:flex-start;padding:12px 16px;gap:12px;border-radius:12px}
+.prov .pi{width:22px;height:22px;display:grid;place-items:center}
+.or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.85rem}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.err{color:var(--bad);font-size:.9rem;font-weight:600}
+.ok{color:var(--good);font-size:.9rem;font-weight:600}
+.note{font-size:.82rem;color:var(--muted);background:var(--soft);padding:10px 12px;border-radius:10px}
+
+/* member panel */
+.dash{display:grid;grid-template-columns:1.5fr 1fr;gap:24px;padding-bottom:20px}
+.sub-card{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
+.cont{display:grid;grid-template-columns:110px 1fr auto;gap:14px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;text-decoration:none}
+.cont .cover{aspect-ratio:16/10;border-radius:8px;padding:0}
+.bar{height:8px;background:var(--soft);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good);border-radius:999px}
+
+/* player */
+.player{display:grid;grid-template-columns:320px 1fr;gap:24px;padding:24px 0 40px;align-items:start}
+.trail{position:sticky;top:80px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;max-height:calc(100vh - 100px);display:flex;flex-direction:column}
+.trail-head{padding:16px;border-bottom:1px solid var(--line);display:grid;gap:8px}
+.trail-head h2{font-size:1.1rem}
+.trail-body{overflow:auto}
+.trail .mt{padding:12px 16px 4px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.lbtn{display:grid;grid-template-columns:22px 1fr auto;gap:10px;width:100%;text-align:left;border:0;background:transparent;padding:10px 16px;cursor:pointer;align-items:center;font-size:.93rem}
+.lbtn:hover{background:var(--soft)}
+.lbtn.on{background:color-mix(in srgb,var(--accent) 16%,transparent);font-weight:700}
+.dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
+.dot.done{background:var(--good);border-color:var(--good)}
+.dot.lock{border:0}
+.stage{display:grid;gap:20px}
+.video{aspect-ratio:16/9;border-radius:16px;background:#0B1716;color:#E6EFED;display:grid;place-items:center;position:relative;overflow:hidden}
+.video .vin{display:grid;gap:12px;justify-items:center;text-align:center;padding:20px;position:relative}
+.play{width:72px;height:72px;border-radius:50%;background:var(--accent);display:grid;place-items:center}
+.lesson-body{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px;display:grid;gap:14px}
+.lesson-body h1{font-size:1.7rem}
+.prose{display:grid;gap:12px;max-width:68ch}
+.prose ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.activity{border:2px solid var(--line);border-radius:var(--r);padding:22px;display:grid;gap:16px;background:var(--surface)}
+.activity .k{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--warn)}
+fieldset.q{border:0;padding:0;margin:0;display:grid;gap:8px}
+fieldset.q legend{font-weight:700;margin-bottom:8px;padding:0}
+.opt{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.opt:hover{border-color:var(--muted)}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,transparent)}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent)}
+.lesson-nav{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lock-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:32px;display:grid;gap:14px;justify-items:start}
+
+/* admin */
+.admin-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:18px}
+.status-line{font-size:.88rem;padding:10px 14px;border-radius:10px;background:var(--soft);display:flex;gap:8px;align-items:center}
+.status-line .sdot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.status-line.ok .sdot{background:var(--good)}
+.status-line.warn .sdot{background:var(--warn)}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);font-size:.93rem;vertical-align:middle}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;background:var(--soft)}
+tr:last-child td{border-bottom:0}
+.mini{width:56px;height:36px;border-radius:6px;overflow:hidden}
+.mini svg{width:100%;height:100%;display:block}
+.editor{display:grid;gap:20px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.form-grid .full{grid-column:1/-1}
+.ed-mod{border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px;background:var(--surface)}
+.ed-les{border:1px dashed var(--line);border-radius:10px;padding:14px;display:grid;gap:10px;background:var(--bg)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+.hue-prev{width:100%;height:60px;border-radius:10px;overflow:hidden}
+.hue-prev svg{width:100%;height:100%;display:block}
+.steps-list{display:grid;gap:12px;counter-reset:s}
+.steps-list li{list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:4px}
+
+/* modal + toast */
+.overlay{position:fixed;inset:0;background:rgba(5,12,11,.55);display:grid;place-items:center;z-index:50;padding:20px}
+.modal{background:var(--surface);border-radius:20px;padding:26px;max-width:460px;width:100%;display:grid;gap:14px;border:1px solid var(--line);max-height:90vh;overflow:auto}
+.modal h2{font-size:1.4rem}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.plan-pick{display:grid;gap:10px}
+.plan-pick label{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.plan-pick label:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+@media (max-width: 980px){
+  .hero-grid,.detail,.dash,.auth{grid-template-columns:1fr}
+  .how,.earn-list{grid-template-columns:1fr}
+  .player{grid-template-columns:1fr}
+  .trail{position:static;max-height:none}
+  .app-row{grid-template-columns:56px 1fr}
+  .app-row .app-icon{width:56px;height:56px}
+  .app-row .dl-row{grid-column:1/-1;justify-content:flex-start;max-width:none}
+}
+@media (max-width: 760px){
+  .nav{display:none}
+  .nav.open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px}
+  .top .menu-btn{display:inline-flex}
+  .plans,.form-grid{grid-template-columns:1fr}
+  .top-actions .btn-accent{display:none}
+  .cont{grid-template-columns:80px 1fr}
+  .cont .btn{grid-column:1/-1}
+  .final-cta{padding:28px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap" id="topbar"></div>
+</header>
+<main id="app"></main>
+<footer>
+  <div class="wrap">
+    <a href="#inicio" class="logo"><span class="logo-mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 18 L15 6" stroke="#E8A12E" stroke-width="3" stroke-linecap="round"/><path d="M9 18h12" stroke="#F2F7F6" stroke-width="3" stroke-linecap="round"/><circle cx="15" cy="6" r="2.6" fill="#E8A12E"/></svg></span>Alavanca</a>
+    <nav>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#apps">Aplicativos</a>
+      <a href="#planos">Planos</a>
+      <a href="#painel">Área do assinante</a>
+      <a href="#admin">Área administrativa</a>
+    </nav>
+    <p class="fine">Nome e valores provisórios. Versão base da plataforma.</p>
+  </div>
+</footer>
+<div id="modal-root"></div>
+
+<script>
+/* ---------- conteúdo inicial (ideias do brainstorming de 14/11) ---------- */
+const DEFAULTS = [
+{id:'protocolo-sobrevivencia',kind:'curso',order:1,title:'Protocolo Sobrevivência',cat:'Saúde e segurança',hue:4,status:'disponivel',author:'Jonas',
+ tagline:'Primeiros socorros e gestão de crises, com simulações práticas.',
+ desc:'Suporte básico de vida, engasgo, gestão de crises e prevenção de acidentes. Teoria curta, demonstração e atividade em cada aula, para você agir com segurança em casa, no trabalho e na rua.',
+ earn:'Ofereça treinamentos de primeiros socorros para condomínios, escolas e pequenas empresas, com o roteiro e a proposta comercial do curso.',
+ related:'tiktok-do-saber',
+ modules:[
+  {id:'m1',title:'Suporte básico de vida',lessons:[
+   {id:'l1',title:'Avalie a cena antes de agir',min:6,video:'',content:'Antes de qualquer socorro, garanta que o local é seguro para você e para a vítima. Um socorrista ferido vira uma segunda vítima.\n\n- Observe riscos: trânsito, fogo, fios elétricos, fumaça\n- Toque nos ombros da vítima e chame em voz alta\n- Sem resposta, peça ajuda e ligue 192 (SAMU) ou 193 (Bombeiros)\n- Peça para alguém buscar um DEA (desfibrilador), se houver no local\n\nO número de emergência deve ser chamado antes de iniciar as manobras, ou por outra pessoa enquanto você começa.',
+    activity:{type:'quiz',questions:[{q:'Qual é o primeiro passo ao encontrar uma pessoa caída?',opts:['Verificar se o local é seguro','Começar as compressões imediatamente','Dar água para a vítima'],a:0},{q:'Qual número chama o SAMU?',opts:['190','192','193'],a:1}]}},
+   {id:'l2',title:'RCP em adultos',min:9,video:'',content:'Se a vítima não responde e não respira normalmente, comece a reanimação cardiopulmonar (RCP).\n\n- Mãos sobrepostas no centro do peito\n- Braços esticados, compressões de 5 a 6 cm de profundidade\n- Ritmo de 100 a 120 compressões por minuto\n- Deixe o tórax voltar totalmente entre as compressões\n- Se você for treinado, intercale 30 compressões com 2 ventilações\n\nNão pare até a chegada do socorro, até a vítima reagir ou até o DEA pedir para todos se afastarem.',
+    activity:{type:'quiz',questions:[{q:'Qual o ritmo recomendado de compressões?',opts:['60 a 80 por minuto','100 a 120 por minuto','150 a 180 por minuto'],a:1},{q:'Qual a profundidade das compressões em adultos?',opts:['1 a 2 cm','5 a 6 cm','10 cm'],a:1}]}},
+   {id:'l3',title:'Engasgo: manobra de Heimlich',min:7,video:'',content:'Se a pessoa consegue tossir, incentive a tosse. Se ela não consegue falar, tossir ou respirar:\n\n- Posicione-se atrás dela e abrace-a pela cintura\n- Feche uma das mãos e coloque acima do umbigo, abaixo das costelas\n- Com a outra mão por cima, puxe para dentro e para cima, com força\n- Repita até o objeto sair ou a pessoa desmaiar\n\nSe ela desmaiar, ligue 192 e inicie a RCP.',
+    activity:{type:'pratica',prompt:'Descreva com suas palavras, em até 5 passos, como você explicaria a manobra de Heimlich para uma turma de pessoas leigas.'}}]},
+  {id:'m2',title:'Transforme em renda',lessons:[
+   {id:'l4',title:'Monte seu treinamento para condomínios',min:8,video:'',content:'Condomínios, escolas e pequenas empresas precisam de pessoas preparadas e muitas vezes não sabem por onde começar. Um treinamento de 2 horas com demonstração prática é um produto simples de vender.\n\n- Público: síndicos, porteiros, equipes de limpeza e moradores\n- Formato: 2 horas, até 20 pessoas, com boneco de treino\n- Entregáveis: apostila, lista de presença e certificado de participação\n\nPara treinamentos exigidos por norma regulamentadora, confira antes a habilitação exigida do instrutor.',
+    activity:{type:'pratica',prompt:'Escreva o primeiro parágrafo da proposta que você enviaria ao síndico do seu prédio.'}},
+   {id:'l5',title:'Precifique e venda',min:6,video:'',content:'Calcule o preço somando seu tempo, deslocamento, materiais e uma margem.\n\n- Tempo de preparo e de aplicação\n- Materiais: impressões, luvas, boneco (aluguel ou compra)\n- Margem de lucro de 30% a 50%\n\nComece com um preço de lançamento para os três primeiros clientes em troca de depoimentos.',
+    activity:{type:'quiz',questions:[{q:'O que deve entrar no cálculo do preço?',opts:['Só o tempo de aula','Tempo, deslocamento, materiais e margem','O preço do concorrente, sem ajustes'],a:1}]}}]}
+ ]},
+{id:'creator-de-expertise',kind:'curso',order:2,title:'Creator de Expertise',cat:'Negócios digitais',hue:38,status:'disponivel',author:'Jonas',
+ tagline:'Transforme o que você sabe em assinatura recorrente.',
+ desc:'Para especialistas de nicho que querem vender conhecimento: encontrar o tema certo, validar antes de gravar, escolher o formato e montar a primeira página de vendas.',
+ earn:'Publique seu próprio curso ou assinatura dentro da Alavanca e receba a cada venda, com cobrança recorrente automática.',
+ related:'criador-de-posts',
+ modules:[
+  {id:'m1',title:'Encontre seu nicho',lessons:[
+   {id:'l1',title:'O que você sabe que alguém pagaria para saber',min:7,video:'',content:'Expertise de nicho vende mais do que conteúdo genérico. Uma enfermeira especialista em curativos, um contador de recuperação judicial ou um agrônomo têm conhecimento que poucos têm.\n\n- Liste problemas com que as pessoas te pedem ajuda com frequência\n- Marque os que custam dinheiro ou tempo para quem tem o problema\n- Escolha um que você consegue explicar com exemplos reais',
+    activity:{type:'pratica',prompt:'Liste 3 temas em que você é a pessoa que os outros procuram e, para cada um, quem pagaria por essa ajuda.'}},
+   {id:'l2',title:'Valide antes de gravar',min:6,video:'',content:'Não grave um curso inteiro antes de saber se alguém compra.\n\n- Converse com 5 pessoas do seu público\n- Ofereça uma aula ao vivo em pré-venda\n- Só produza o curso completo depois das primeiras vendas',
+    activity:{type:'quiz',questions:[{q:'Qual a melhor forma de validar um curso?',opts:['Gravar tudo e lançar','Pré-vender uma aula ao vivo','Perguntar só para a família'],a:1}]}}]},
+  {id:'m2',title:'Monte sua oferta',lessons:[
+   {id:'l3',title:'Curso, assinatura ou mentoria?',min:8,video:'',content:'Cada formato tem um ritmo de receita.\n\n- Curso: venda única, bom para conteúdo que não muda\n- Assinatura: receita recorrente, exige conteúdo novo todo mês\n- Mentoria: valor alto, poucas pessoas, seu tempo é o limite\n\nMuitos especialistas combinam os três: o curso atrai, a assinatura sustenta e a mentoria aumenta o valor por cliente.',
+    activity:{type:'quiz',questions:[{q:'Qual formato gera receita recorrente?',opts:['Curso de venda única','Assinatura','E-book'],a:1}]}},
+   {id:'l4',title:'Sua primeira página de vendas',min:7,video:'',content:'A página precisa responder quatro perguntas: para quem é, que problema resolve, o que a pessoa recebe e quanto custa.\n\n- Título com a promessa principal\n- Prova: sua experiência e resultados de alunos\n- Lista do que está incluso\n- Preço, garantia e botão de compra',
+    activity:{type:'pratica',prompt:'Escreva o título e a promessa principal da sua página de vendas.'}}]}
+ ]},
+{id:'reparos-que-viram-renda',kind:'curso',order:3,title:'Reparos que Viram Renda',cat:'Serviços e reparos',hue:24,status:'disponivel',author:'Jonas',
+ tagline:'Pequenos reparos e montagem de móveis para atender pelo MãoNaRoda.',
+ desc:'Capacitação prática para quem quer prestar serviços presenciais: ferramentas, segurança, montagem de móveis e como montar um perfil que gera clientes.',
+ earn:'Atenda clientes pelo app MãoNaRoda com pagamento garantido e suba de nível para cobrar mais por serviço.',
+ related:'maonaroda',
+ modules:[
+  {id:'m1',title:'Mão na massa',lessons:[
+   {id:'l1',title:'Kit básico de ferramentas',min:5,video:'',content:'Com um kit enxuto você já atende a maioria dos pedidos de pequenos reparos.\n\n- Furadeira com brocas para parede, madeira e metal\n- Jogo de chaves de fenda e Phillips\n- Trena, nível e lápis de marcação\n- Buchas e parafusos de tamanhos variados\n- Óculos de proteção\n\nInvista primeiro no que você usa toda semana e alugue o resto.',
+    activity:{type:'quiz',questions:[{q:'Qual item de segurança deve estar no kit básico?',opts:['Óculos de proteção','Luvas de cozinha','Capacete de moto'],a:0}]}},
+   {id:'l2',title:'Furar parede com segurança',min:7,video:'',content:'O maior risco ao furar uma parede é atingir canos ou fios.\n\n- Evite furar em linha reta acima ou abaixo de tomadas e interruptores\n- Use um detector de metais e tensão, se tiver\n- Marque o ponto com fita crepe para a broca não escorregar\n- Use a broca do mesmo diâmetro da bucha\n\nNa dúvida, pergunte ao cliente por onde passam as tubulações.',
+    activity:{type:'quiz',questions:[{q:'Onde é mais arriscado furar?',opts:['No meio de uma parede sem tomadas','Em linha reta acima de uma tomada','Em um móvel de madeira'],a:1}]}},
+   {id:'l3',title:'Montagem de móveis sem retrabalho',min:8,video:'',content:'- Separe e conte as peças antes de começar\n- Monte sobre o papelão da embalagem para não riscar o piso\n- Aperte os parafusos só no fim, depois de alinhar tudo\n- Tire foto do móvel pronto para o seu portfólio',activity:{type:'nenhuma'}}]},
+  {id:'m2',title:'Fature com o MãoNaRoda',lessons:[
+   {id:'l4',title:'Perfil, preço e agenda',min:6,video:'',content:'No MãoNaRoda, seu perfil é seu cartão de visitas.\n\n- Foto clara e descrição dos serviços que você faz bem\n- Preço por serviço, e não por hora, para pedidos comuns\n- Agenda atualizada para não perder clientes\n\nCada avaliação positiva ajuda você a subir de nível: Iniciante, Verificado, Pro e Equipe.',
+    activity:{type:'pratica',prompt:'Escreva a descrição do seu perfil em até 3 frases.'}}]}
+ ]},
+{id:'cine-treinamento',kind:'curso',order:4,title:'Cine Treinamento',cat:'Liderança',hue:212,status:'em-breve',author:'Jonas',
+ tagline:'Liderança e comunicação ensinadas com curtas-metragens.',
+ desc:'Episódios em formato de série retratam situações reais de trabalho, como feedback difícil, conflito na equipe e decisões sob pressão, seguidos de discussão guiada.',
+ earn:'Facilitadores certificados aplicam as sessões em empresas e cobram por turma.',
+ modules:[{id:'m1',title:'Liderança em cena',lessons:[{id:'l1',title:'Episódio 1: o feedback que ninguém quer dar',min:12,video:'',content:'',activity:{type:'nenhuma'}},{id:'l2',title:'Episódio 2: conflito na equipe',min:14,video:'',content:'',activity:{type:'nenhuma'}}]},{id:'m2',title:'Aplicação na empresa',lessons:[{id:'l3',title:'Como conduzir a sessão de discussão',min:10,video:'',content:'',activity:{type:'nenhuma'}}]}]},
+{id:'mentoria-de-elite',kind:'curso',order:5,title:'Mentoria de Elite',cat:'Mentoria',hue:168,status:'em-breve',author:'Jonas',
+ tagline:'Masterclasses e mentorias com especialistas renomados.',
+ desc:'Conhecimento técnico de alto valor em finanças, direito empresarial, tecnologia e estratégia, com sessões ao vivo para discutir casos reais.',
+ earn:'Aplique as estratégias no seu negócio e use a comunidade de participantes para fechar parcerias.',
+ modules:[{id:'m1',title:'Masterclasses',lessons:[{id:'l1',title:'Estratégia de negócios com quem já fez',min:40,video:'',content:'',activity:{type:'nenhuma'}},{id:'l2',title:'Finanças para empreendedores',min:35,video:'',content:'',activity:{type:'nenhuma'}}]},{id:'m2',title:'Sessões ao vivo',lessons:[{id:'l3',title:'Como aproveitar a mentoria em grupo',min:15,video:'',content:'',activity:{type:'nenhuma'}}]}]},
+{id:'fandom-inteligente',kind:'curso',order:6,title:'Fandom Inteligente',cat:'Cultura e consumo',hue:330,status:'em-breve',author:'Jonas',
+ tagline:'História dos ídolos e compra consciente de produtos oficiais.',
+ desc:'Trajetória, contexto e bastidores de ídolos, com um módulo para identificar produtos oficiais, evitar falsificações e comparar preços entre lojas.',
+ earn:'Vire curador do seu fandom: venda guias de compra e ganhe comissão como afiliado de lojas oficiais.',
+ modules:[{id:'m1',title:'História e contexto',lessons:[{id:'l1',title:'Como ler a trajetória de um ídolo',min:9,video:'',content:'',activity:{type:'nenhuma'}}]},{id:'m2',title:'Compra consciente',lessons:[{id:'l2',title:'Oficial ou falsificado: como identificar',min:8,video:'',content:'',activity:{type:'nenhuma'}},{id:'l3',title:'Comparando preços entre lojas',min:6,video:'',content:'',activity:{type:'nenhuma'}}]}]},
+
+{id:'tiktok-do-saber',kind:'app',order:10,title:'TikTok do Saber',cat:'Aprendizado',hue:172,status:'em-breve',author:'Jonas',
+ tagline:'Pílulas de 3 a 7 minutos para resolver problemas do dia a dia.',
+ desc:'Feed vertical de vídeos curtos e práticos, como furar uma parede ou agir em primeiros socorros, com recomendação por IA, busca por voz, download offline de vídeos urgentes e nenhuma propaganda.',
+ earn:'Publique suas próprias pílulas e direcione quem assiste para o seu curso completo.',
+ platforms:['android','ios'],links:{},version:'',free:false,related:'protocolo-sobrevivencia'},
+{id:'agencia-de-sites',kind:'app',order:11,title:'Agência de Sites',cat:'Negócios digitais',hue:205,status:'em-breve',author:'Diogo',
+ tagline:'Escolha um modelo de site e o nível de suporte que precisa.',
+ desc:'Modelos prontos de site com planos de suporte para criação, configuração e manutenção, tudo gerenciado por dentro da plataforma.',
+ earn:'Revenda sites prontos para pequenos negócios da sua cidade e deixe a manutenção com a plataforma.',
+ platforms:['web'],links:{},version:'',free:false},
+{id:'trilhaviva',kind:'app',order:12,title:'TrilhaViva',cat:'Bem-estar',hue:140,status:'em-breve',author:'Jonas',
+ tagline:'Encontros e práticas ao ar livre para a saúde mental.',
+ desc:'Marketplace de experiências presenciais ao ar livre. O app serve de ponte: você reserva, faz check-in e guarda o celular.',
+ earn:'Organize encontros pagos ao ar livre ou ganhe comissão por cada participante que você indicar e que comparecer.',
+ platforms:['android','ios'],links:{},version:'',free:false},
+{id:'rotina-mais',kind:'app',order:13,title:'Rotina+',cat:'Renda extra',hue:48,status:'em-breve',author:'Jonas',
+ tagline:'Aprenda rotinas, delegue tarefas da casa e ganhe executando tarefas.',
+ desc:'Programas de rotina para comprar e tarefas simples de casa para contratar ou executar, como limpeza, compras, pets e plantas, com uma única conta.',
+ earn:'Ganhe executando tarefas simples para vizinhos ou vendendo seus próprios programas de rotina.',
+ platforms:['android','ios'],links:{},version:'',free:false},
+{id:'maonaroda',kind:'app',order:14,title:'MãoNaRoda',cat:'Serviços e reparos',hue:18,status:'em-breve',author:'Jonas',
+ tagline:'Trabalho freelancer presencial com pagamento garantido.',
+ desc:'O freelancer cria o perfil, define preço e agenda, recebe com pagamento garantido e sobe de nível. A reputação pertence a ele.',
+ earn:'Receba por serviços presenciais e ganhe comissão ao indicar clientes ou recrutar trabalhadores.',
+ platforms:['android','ios'],links:{},version:'',free:false,related:'reparos-que-viram-renda'},
+{id:'quintal',kind:'app',order:15,title:'Quintal',cat:'Família',hue:95,status:'em-breve',author:'Jonas',
+ tagline:'Uma experiência de 15 minutos por dia entre adulto e criança.',
+ desc:'Tarefas da casa, brincadeiras e momentos ao ar livre alinhados à BNCC da Educação Infantil. O app é para o adulto: a criança nunca usa a tela.',
+ earn:'Gratuito para famílias. Escolas e educadores parceiros levam o programa para suas turmas.',
+ platforms:['android','ios'],links:{},version:'',free:true},
+{id:'criador-de-posts',kind:'app',order:16,title:'Criador de Posts',cat:'Marketing',hue:345,status:'em-breve',author:'Mauricio',
+ tagline:'Assistente que cria posts orgânicos para o Instagram.',
+ desc:'Usa o seu perfil e as tendências do mercado para sugerir posts, legendas e calendário de conteúdo que geram seguidores e contatos.',
+ earn:'Venda gestão de Instagram como serviço, usando o app para produzir o conteúdo dos seus clientes.',
+ platforms:['web','android','ios'],links:{},version:'',free:false,related:'creator-de-expertise'},
+{id:'ensinia',kind:'app',order:17,title:'EnsinIA',cat:'Educação',hue:190,status:'em-breve',author:'Diogo',
+ tagline:'Conteúdos de aula gerados com IA, alinhados ao MEC.',
+ desc:'Professores geram planos de aula, exercícios e materiais de estudo alinhados às diretrizes do MEC. Alunos usam para estudar em casa.',
+ earn:'Professores ganham tempo de preparo e podem oferecer reforço escolar com o material gerado.',
+ platforms:['web','android'],links:{},version:'',free:false}
+];
+
+const PLANS = {
+  mensal:{id:'mensal',name:'Mensal',price:'R$ 59,90',per:'/mês',note:'Cobrado todo mês'},
+  anual:{id:'anual',name:'Anual',price:'R$ 39,90',per:'/mês',note:'R$ 478,80 cobrados uma vez por ano'}
+};
+const PLAT = {android:'Google Play',ios:'App Store',web:'Versão web',desktop:'Windows e macOS'};
+
+/* ---------- armazenamento local ---------- */
+const mem = {};
+const S = {
+  get(k,d){ if(k in mem) return mem[k]; try{ const v=localStorage.getItem(k); if(v!=null){ mem[k]=JSON.parse(v); return mem[k]; } }catch(e){} return d; },
+  set(k,v){ mem[k]=v; try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+
+const state = {
+  db:null, user:null, canAdmin:true, dbStatus:'local', overrides:{},
+  localOverrides:S.get('alv.local',{}),
+  session:S.get('alv.session',null),
+  filter:{q:'',kind:'todos',cat:'todas'},
+  lesson:{}, quiz:{}, quizDone:{}, practiceDraft:{},
+  draft:null, editing:false, adminTab:'cursos',
+  authTab:'entrar', authMsg:'', authErr:'', after:null,
+  notify:S.get('alv.notify',{}), navOpen:false
+};
+
+/* ---------- utilidades ---------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const $ = s => document.querySelector(s);
+const rid = p => p + Math.random().toString(36).slice(2,8);
+const slug = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60) || 'item';
+const isHttps = u => /^https:\/\/[^\s]+$/i.test(String(u||''));
+function seed(str){ let h=2166136261; for(const c of String(str)){ h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return h>>>0; }
+function rng(s){ return ()=>{ s=(s+0x6D2B79F5)>>>0; let t=s; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
+
+function normalize(x){
+  const it = Object.assign({}, x);
+  it.kind = it.kind==='app'?'app':'curso';
+  for(const k of ['title','cat','tagline','desc','earn','author','status','version','related']) it[k] = typeof it[k]==='string'?it[k]:'';
+  it.status = it.status==='disponivel'?'disponivel':'em-breve';
+  it.hue = Number.isFinite(+it.hue)?+it.hue:170;
+  it.order = Number.isFinite(+it.order)?+it.order:99;
+  it.free = !!it.free;
+  it.platforms = Array.isArray(it.platforms)?it.platforms.filter(p=>PLAT[p]):[];
+  it.links = it.links && typeof it.links==='object'?it.links:{};
+  it.modules = Array.isArray(it.modules)?it.modules.map(m=>({id:String(m.id||rid('m')),title:String(m.title||'Módulo'),
+    lessons:Array.isArray(m.lessons)?m.lessons.map(l=>({id:String(l.id||rid('l')),title:String(l.title||'Aula'),min:+l.min||0,video:String(l.video||''),content:String(l.content||''),
+      activity:normAct(l.activity)})):[]})):[];
+  return it;
+}
+function normAct(a){
+  a = a && typeof a==='object'?a:{};
+  const type = ['quiz','pratica'].includes(a.type)?a.type:'nenhuma';
+  const questions = Array.isArray(a.questions)?a.questions.filter(q=>q&&q.q&&Array.isArray(q.opts)&&q.opts.length>1).map(q=>({q:String(q.q),opts:q.opts.map(String),a:Math.min(Math.max(+q.a||0,0),q.opts.length-1)})):[];
+  return {type, questions, prompt:String(a.prompt||'')};
+}
+function catalog(){
+  const ov = state.db ? state.overrides : state.localOverrides;
+  const map = new Map(DEFAULTS.map(d=>[d.id,d]));
+  for(const [id,o] of Object.entries(ov||{})){ if(o && typeof o==='object') map.set(id, Object.assign({}, map.get(id)||{}, o, {id})); }
+  return [...map.values()].filter(x=>!x.deleted).map(normalize).sort((a,b)=>a.order-b.order || a.title.localeCompare(b.title));
+}
+const byId = id => catalog().find(x=>x.id===id);
+const flat = c => { const out=[]; c.modules.forEach((m,mi)=>m.lessons.forEach((l,li)=>out.push({m,l,mi,li,idx:out.length}))); return out; };
+const totalMin = c => flat(c).reduce((s,x)=>s+(x.l.min||0),0);
+
+/* progresso do assinante */
+const emptyProg = () => ({done:{},quiz:{},practice:{},last:{}});
+function prog(){ if(!state.session) return emptyProg(); return Object.assign(emptyProg(), S.get('alv.prog.'+state.session.email, emptyProg())); }
+function saveProg(p){ if(state.session) S.set('alv.prog.'+state.session.email, p); }
+function pct(c){ const fl=flat(c); if(!fl.length) return 0; const p=prog(); return Math.round(100*fl.filter(x=>p.done[c.id+'/'+x.l.id]).length/fl.length); }
+
+/* ---------- arte das capas ---------- */
+function art(it){
+  const h=it.hue, r=rng(seed(it.id||it.title));
+  let shapes='';
+  if(it.kind==='curso'){
+    for(let i=0;i<7;i++){ const y=18+i*22+r()*6, w=140+r()*260, x=360-w*0.2+r()*80; shapes+=`<rect x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="${w.toFixed(0)}" height="10" rx="5" fill="hsl(${h} 70% 85% / ${(0.10+r()*0.18).toFixed(2)})"/>`; }
+    shapes+=`<circle cx="${(470+r()*60).toFixed(0)}" cy="${(40+r()*30).toFixed(0)}" r="${(26+r()*14).toFixed(0)}" fill="hsl(${(h+40)%360} 90% 62% / .9)"/>`;
+  } else {
+    for(let i=0;i<5;i++) for(let j=0;j<4;j++){ if(r()<.25) continue; shapes+=`<rect x="${330+i*44}" y="${16+j*44}" width="32" height="32" rx="9" fill="hsl(${(h+(r()<.2?40:0))%360} 75% ${r()<.2?62:85}% / ${r()<.2?0.95:(0.12+r()*0.2).toFixed(2)})"/>`; }
+  }
+  return `<svg viewBox="0 0 560 315" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="g${esc(it.id)}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h} 55% 34%)"/><stop offset="1" stop-color="hsl(${(h+28)%360} 60% 18%)"/></linearGradient></defs><rect width="560" height="315" fill="url(#g${esc(it.id)})"/>${shapes}</svg>`;
+}
+function cover(it, opts={}){
+  const st = it.status==='disponivel'?'<span class="chip pill-ok">Disponível</span>':'<span class="chip pill-soon">Em breve</span>';
+  return `<div class="cover">${art(it)}<div class="chips"><span class="chip">${it.kind==='app'?'Aplicativo':'Curso'}</span>${opts.noStatus?'':st}</div>${opts.noTitle?'':`<div class="ct">${esc(it.title)}</div>`}</div>`;
+}
+
+/* ícones */
+const IC = {
+  lock:'<svg class="ico" viewBox="0 0 20 20" fill="none"><rect x="4" y="9" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="currentColor" stroke-width="1.6"/></svg>',
+  play:'<svg class="ico" viewBox="0 0 20 20"><path d="M6 4.5v11l9-5.5z" fill="currentColor"/></svg>',
+  check:'<svg width="12" height="12" viewBox="0 0 16 16"><path d="M6.5 11.2 3.3 8l1.1-1.1 2.1 2.1 5.1-5.1L12.7 5z" fill="#fff"/></svg>',
+  search:'<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.8"/><path d="m14 14 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  dl:'<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 3v10m0 0-4-4m4 4 4-4M4 16h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+};
+
+/* ---------- textos de aula ---------- */
+function rich(t){
+  return String(t||'').trim().split(/\n\s*\n/).map(b=>{
+    const lines=b.split('\n');
+    if(lines.every(l=>/^\s*-\s+/.test(l))) return '<ul>'+lines.map(l=>'<li>'+esc(l.replace(/^\s*-\s+/,''))+'</li>').join('')+'</ul>';
+    return '<p>'+esc(b).replace(/\n/g,'<br>')+'</p>';
+  }).join('');
+}
+
+/* ---------- cabeçalho ---------- */
+function renderTop(view){
+  const s=state.session;
+  const on = v => view===v?'on':'';
+  $('#topbar').innerHTML = `
+    <a href="#inicio" class="logo" aria-label="Alavanca, início"><span class="logo-mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 18 L15 6" stroke="#E8A12E" stroke-width="3" stroke-linecap="round"/><path d="M9 18h12" stroke="#F2F7F6" stroke-width="3" stroke-linecap="round"/><circle cx="15" cy="6" r="2.6" fill="#E8A12E"/></svg></span>Alavanca</a>
+    <nav class="nav ${state.navOpen?'open':''}" aria-label="Principal">
+      <a href="#inicio" class="${on('inicio')}">Início</a>
+      <a href="#catalogo" class="${on('catalogo')}">Catálogo</a>
+      <a href="#apps" class="${on('apps')}">Aplicativos</a>
+      <a href="#planos" class="${on('planos')}">Planos</a>
+      ${s?`<a href="#painel" class="${on('painel')}">Minha área</a>`:''}
+      ${state.canAdmin?`<a href="#admin" class="${on('admin')}">Admin</a>`:''}
+    </nav>
+    <div class="top-actions">
+      ${s?`<a href="#painel" class="who"><span class="avatar">${esc((s.name||s.email).slice(0,1).toUpperCase())}</span>${esc((s.name||s.email).split(' ')[0])}</a>`
+         :`<a href="#entrar" class="btn btn-sm">Entrar</a>`}
+      ${s&&s.sub?'':`<button class="btn btn-accent btn-sm" data-act="subscribe">Assine já</button>`}
+      <button class="btn btn-sm menu-btn" data-act="menu" aria-label="Abrir menu">Menu</button>
+    </div>`;
+}
+
+/* ---------- telas ---------- */
+function vHome(){
+  const all=catalog(), courses=all.filter(x=>x.kind==='curso'), apps=all.filter(x=>x.kind==='app');
+  const showcase=['protocolo-sobrevivencia','creator-de-expertise','reparos-que-viram-renda'].map(byId).filter(Boolean);
+  return `
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Cursos + aplicativos numa só assinatura</p>
+        <h1>Aqui não te ensinamos apenas como fazer. <em>Te damos as ferramentas para você ganhar dinheiro</em> com o conhecimento adquirido.</h1>
+        <p class="lead">Cada curso vem ligado a um aplicativo ou a um modelo de negócio pronto. Você aprende, aplica no mesmo dia e começa a faturar.</p>
+        <div class="cta-row">
+          <button class="btn btn-accent btn-lg" data-act="subscribe">Assine já</button>
+          <a href="#catalogo" class="btn btn-ghost-light btn-lg">Ver o catálogo</a>
+        </div>
+        <p class="fine">A primeira aula de cada curso é liberada para quem cria a conta, sem precisar assinar.</p>
+      </div>
+      <aside class="path" aria-label="Exemplo de trilha">
+        <h3>Exemplo: Protocolo Sobrevivência</h3>
+        <div class="step"><b>1</b><div><strong>Aprenda</strong><span>RCP, engasgo e gestão de crises em aulas curtas com atividade.</span></div></div>
+        <div class="step"><b>2</b><div><strong>Aplique</strong><span>Roteiro de treinamento, modelo de proposta e cálculo de preço.</span></div></div>
+        <div class="step"><b>3</b><div><strong>Fature</strong><span>Venda turmas para condomínios, escolas e pequenas empresas.</span></div></div>
+      </aside>
+    </div>
+    <div class="wrap strip">
+      <div><strong class="num">${courses.length}</strong>cursos</div>
+      <div><strong class="num">${apps.length}</strong>aplicativos</div>
+      <div><strong>1</strong>assinatura para tudo</div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head"><div><h2>Como funciona</h2><p class="muted">Conhecimento só vale quando vira resultado. Por isso, cada trilha termina em algo que você pode vender.</p></div></div>
+      <div class="how">
+        <article><span class="n">1</span><h3>Assine e escolha sua trilha</h3><p class="muted">Acesso a todos os cursos e aplicativos do catálogo enquanto a assinatura estiver ativa.</p></article>
+        <article><span class="n">2</span><h3>Aprenda com prática</h3><p class="muted">Aulas curtas, com vídeo, texto de apoio e atividade em cada etapa. Seu progresso fica salvo.</p></article>
+        <article><span class="n">3</span><h3>Use as ferramentas para faturar</h3><p class="muted">Aplicativos, modelos e roteiros prontos para transformar o que você aprendeu em renda.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head"><div><h2>Do curso ao faturamento</h2><p class="muted">Cada produto do catálogo responde a uma pergunta: como você ganha dinheiro com isso?</p></div><a class="btn" href="#catalogo">Ver todos</a></div>
+      <div class="earn-list">
+        ${showcase.map(it=>{ const rel=it.related?byId(it.related):null; return `
+        <a class="earn-card card" href="#item-${esc(it.id)}">${cover(it)}
+          <div class="body">
+            <div class="flow">
+              <div><span class="k">Aprenda</span><span>${esc(it.tagline)}</span></div>
+              ${rel?`<div><span class="k">Use</span><span>App ${esc(rel.title)}</span></div>`:''}
+              <div><span class="k">Fature</span><span>${esc(it.earn)}</span></div>
+            </div>
+          </div></a>`;}).join('')}
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head"><div><h2>Aplicativos inclusos</h2><p class="muted">Ferramentas para aplicar o que você aprende. Os assinantes baixam direto da área de aplicativos.</p></div><a class="btn" href="#apps">Área de aplicativos</a></div>
+      <div class="grid">${apps.slice(0,4).map(card).join('')}</div>
+    </div>
+  </section>
+
+  ${vPlansBlock()}
+
+  <section class="block" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head"><h2>Perguntas frequentes</h2></div>
+      <div class="faq">
+        <details><summary>Preciso ter experiência na área?</summary><p>Não. As trilhas começam do básico e cada aula tem uma atividade para você praticar antes de seguir.</p></details>
+        <details><summary>Os aplicativos estão inclusos na assinatura?</summary><p>Sim. Enquanto a assinatura estiver ativa, você baixa e usa todos os aplicativos do catálogo. Alguns, como o Quintal, são gratuitos para todos.</p></details>
+        <details><summary>Posso assistir antes de assinar?</summary><p>Sim. Crie uma conta gratuita e assista à primeira aula de qualquer curso.</p></details>
+        <details><summary>Como entro na plataforma?</summary><p>Com e-mail e senha, com a sua conta Google ou com a sua conta Apple.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="padding-top:0">
+    <div class="wrap"><div class="final-cta"><h2>Pare de só aprender. Comece a faturar com o que você sabe.</h2><button class="btn btn-accent btn-lg" data-act="subscribe">Assine já</button></div></div>
+  </section>`;
+}
+
+function vPlansBlock(){
+  const inc=['Todos os cursos e novas trilhas','Todos os aplicativos para baixar','Atividades com correção e progresso salvo','Modelos de proposta, preço e venda'];
+  return `
+  <section class="block" id="planos-sec">
+    <div class="wrap">
+      <div class="sec-head"><div><h2>Planos</h2><p class="muted">Uma assinatura libera tudo: cursos, atividades e aplicativos.</p></div></div>
+      <div class="plans">
+        ${Object.values(PLANS).map(p=>`
+        <div class="plan ${p.id==='anual'?'best':''}">
+          ${p.id==='anual'?'<span class="badge">Economize 33%</span>':''}
+          <h3>${p.name}</h3>
+          <div class="price num">${p.price}<small> ${p.per}</small></div>
+          <p class="fine">${p.note}</p>
+          <ul class="checks">${inc.map(i=>`<li>${i}</li>`).join('')}</ul>
+          <button class="btn ${p.id==='anual'?'btn-accent':'btn-dark'}" data-act="subscribe" data-plan="${p.id}">Assinar plano ${p.name.toLowerCase()}</button>
+        </div>`).join('')}
+      </div>
+      <p class="fine" style="margin-top:14px">Valores de lançamento, sujeitos a ajuste.</p>
+    </div>
+  </section>`;
+}
+
+function card(it){
+  return `<a class="card" href="#item-${esc(it.id)}">${cover(it)}
+    <div class="body">
+      <span class="fine">${esc(it.cat)}</span>
+      <h3>${esc(it.title)}</h3>
+      <p class="tag">${esc(it.tagline)}</p>
+      <p class="earn"><b>Como você lucra:</b> ${esc(it.earn)}</p>
+    </div></a>`;
+}
+
+function vCatalog(){
+  const all=catalog(); const f=state.filter;
+  const cats=[...new Set(all.map(x=>x.cat).filter(Boolean))].sort();
+  const q=f.q.trim().toLowerCase();
+  const list=all.filter(x=>(f.kind==='todos'||x.kind===f.kind)&&(f.cat==='todas'||x.cat===f.cat)&&(!q||(x.title+' '+x.tagline+' '+x.desc+' '+x.cat).toLowerCase().includes(q)));
+  return `<div class="wrap">
+    <div class="page-head"><h1>Catálogo</h1><p class="muted">Tudo o que os assinantes acessam: cursos para aprender e aplicativos para colocar em prática e faturar.</p></div>
+    <div class="toolbar">
+      <label class="search">${IC.search}<input id="f-q" type="search" placeholder="Buscar por tema, curso ou aplicativo" value="${esc(f.q)}" aria-label="Buscar no catálogo"></label>
+      <div class="seg" role="group" aria-label="Tipo">
+        ${[['todos','Todos'],['curso','Cursos'],['app','Aplicativos']].map(([k,l])=>`<button data-act="kind" data-k="${k}" class="${f.kind===k?'on':''}">${l}</button>`).join('')}
+      </div>
+      <select id="f-cat" class="input" aria-label="Categoria"><option value="todas">Todas as categorias</option>${cats.map(c=>`<option ${f.cat===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    </div>
+    <p class="fine" style="margin-bottom:14px">${list.length} ${list.length===1?'item':'itens'}</p>
+    ${list.length?`<div class="grid">${list.map(card).join('')}</div>`:`<div class="empty">Nada encontrado para essa busca. Tente outro termo ou limpe os filtros.</div>`}
+  </div>`;
+}
+
+function dlButtons(it){
+  const s=state.session, allowed = it.free || (s&&s.sub);
+  const plats = it.platforms.length?it.platforms:['android','ios'];
+  return plats.map(p=>{
+    const link=it.links[p];
+    if(it.status!=='disponivel'||!isHttps(link)) return `<button class="btn btn-sm" disabled>${PLAT[p]} · em breve</button>`;
+    if(!allowed) return `<button class="btn btn-sm" data-act="need-sub">${IC.lock} ${PLAT[p]}</button>`;
+    return `<a class="btn btn-sm btn-dark" href="${esc(link)}" target="_blank" rel="noopener">${IC.dl} ${PLAT[p]}</a>`;
+  }).join('');
+}
+
+function vItem(id){
+  const it=byId(id);
+  if(!it) return `<div class="wrap"><div class="page-head"><h1>Item não encontrado</h1><p class="muted">Ele pode ter sido removido do catálogo.</p></div><a class="btn" href="#catalogo">Voltar ao catálogo</a></div>`;
+  const rel = it.related?byId(it.related):null;
+  if(it.kind==='app'){
+    return `<div class="wrap"><div class="detail">
+      <div style="display:grid;gap:20px">${cover(it)}
+        <div><span class="fine">${esc(it.cat)}</span><h1 style="font-size:clamp(1.8rem,3.5vw,2.4rem);margin-top:4px">${esc(it.title)}</h1><p class="muted" style="margin-top:8px;font-size:1.1rem">${esc(it.tagline)}</p></div>
+        <div class="prose"><p>${esc(it.desc)}</p></div>
+      </div>
+      <aside class="panel">
+        <div class="earn-box"><div class="k">Como você lucra</div><p>${esc(it.earn)}</p></div>
+        <h3>Baixar</h3>
+        <div class="dl-row">${dlButtons(it)}</div>
+        ${it.free?'<p class="fine">Gratuito para todos.</p>':'<p class="fine">Incluso na assinatura.</p>'}
+        ${it.status!=='disponivel'?`<button class="btn" data-act="notify" data-id="${esc(it.id)}">${state.notify[it.id]?'Você será avisado no lançamento':'Avise-me quando lançar'}</button>`:''}
+        ${rel?`<p class="fine">Curso relacionado: <a href="#item-${esc(rel.id)}">${esc(rel.title)}</a></p>`:''}
+      </aside></div></div>`;
+  }
+  const fl=flat(it), p=prog(), sub=state.session&&state.session.sub;
+  return `<div class="wrap"><div class="detail">
+    <div style="display:grid;gap:20px">${cover(it)}
+      <div><span class="fine">${esc(it.cat)}</span><h1 style="font-size:clamp(1.8rem,3.5vw,2.4rem);margin-top:4px">${esc(it.title)}</h1><p class="muted" style="margin-top:8px;font-size:1.1rem">${esc(it.tagline)}</p></div>
+      <div class="meta"><span class="num">${it.modules.length} módulos</span><span class="num">${fl.length} aulas</span><span class="num">${totalMin(it)} min</span><span>${fl.filter(x=>x.l.activity.type!=='nenhuma').length} atividades</span></div>
+      <div class="prose"><p>${esc(it.desc)}</p></div>
+      <h2 style="font-size:1.4rem;margin-top:8px">Conteúdo do curso</h2>
+      <div class="modules">${it.modules.map((m,mi)=>`
+        <div class="module"><h4><span>${esc(m.title)}</span><span class="fine num">${m.lessons.length} aulas</span></h4>
+          <ol>${m.lessons.map(l=>{ const idx=fl.findIndex(x=>x.l.id===l.id); const done=p.done[it.id+'/'+l.id]; const open=idx===0||sub;
+            return `<li><span>${done?'<span class="dot done">'+IC.check+'</span>':open?IC.play:IC.lock}</span><span>${esc(l.title)}${idx===0&&!sub?' <span class="chip pill-ok">Grátis</span>':''}</span><span class="fine num">${l.min} min</span></li>`;}).join('')}</ol>
+        </div>`).join('')}</div>
+    </div>
+    <aside class="panel" style="position:sticky;top:84px">
+      <div class="earn-box"><div class="k">Como você lucra</div><p>${esc(it.earn)}</p></div>
+      ${state.session?`<div style="display:grid;gap:6px"><div class="row between fine"><span>Seu progresso</span><span class="num">${pct(it)}%</span></div><div class="bar"><i style="width:${pct(it)}%"></i></div></div>`:''}
+      ${it.status!=='disponivel'?`<p class="muted">Este curso está em produção.</p><button class="btn" data-act="notify" data-id="${esc(it.id)}">${state.notify[it.id]?'Você será avisado no lançamento':'Avise-me quando lançar'}</button>`
+        :sub?`<a class="btn btn-accent btn-lg" href="#aula-${esc(it.id)}">${pct(it)>0?'Continuar curso':'Começar curso'}</a>`
+        :`<a class="btn btn-dark" href="#aula-${esc(it.id)}">Assistir aula grátis</a><button class="btn btn-accent btn-lg" data-act="subscribe">Assine para liberar tudo</button>`}
+      ${rel?`<p class="fine">Aplicativo para aplicar: <a href="#item-${esc(rel.id)}">${esc(rel.title)}</a></p>`:''}
+    </aside></div></div>`;
+}
+
+function vApps(){
+  const apps=catalog().filter(x=>x.kind==='app'), s=state.session;
+  return `<div class="wrap">
+    <div class="page-head"><h1>Aplicativos</h1><p class="muted">Ferramentas para colocar em prática o que você aprende. Assinantes baixam todos os aplicativos; os gratuitos ficam abertos para qualquer pessoa.</p></div>
+    ${!s||!s.sub?`<div class="panel sub-card" style="margin-bottom:20px"><div><h3>Os downloads são liberados para assinantes</h3><p class="muted">Assine para baixar os aplicativos assim que forem lançados.</p></div><button class="btn btn-accent" data-act="subscribe">Assine já</button></div>`:''}
+    <div class="app-list">${apps.map(it=>`
+      <div class="app-row">
+        <a class="app-icon" href="#item-${esc(it.id)}" aria-label="${esc(it.title)}">${art(it)}</a>
+        <div style="display:grid;gap:4px"><div class="row"><h3><a href="#item-${esc(it.id)}" style="text-decoration:none">${esc(it.title)}</a></h3>${it.status==='disponivel'?'<span class="chip pill-ok">Disponível</span>':'<span class="chip pill-soon">Em breve</span>'}${it.free?'<span class="chip">Gratuito</span>':''}</div>
+          <p class="muted">${esc(it.tagline)}</p>
+          <p class="fine">${esc(it.cat)}${it.version?' · versão '+esc(it.version):''}</p></div>
+        <div class="dl-row">${dlButtons(it)}</div>
+      </div>`).join('')}</div>
+  </div>`;
+}
+
+const GLOGO='<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M14.5 10h-4.5" stroke="currentColor" stroke-width="1.8"/><path d="M14.5 10a4.5 4.5 0 1 1-1.3-3.2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+const ALOGO='<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M13.2 3.2c.1 1-.3 2-.9 2.7-.6.7-1.6 1.2-2.5 1.1-.1-1 .4-2 .9-2.6.7-.7 1.7-1.2 2.5-1.2zM16 13.6c-.4 1-.6 1.4-1.2 2.3-.8 1.2-1.9 2.6-3.3 2.6-1.2 0-1.5-.8-3.2-.8s-2 .8-3.2.8c-1.4 0-2.4-1.3-3.2-2.5C.1 13 .6 9 2.6 7.6c.8-.6 1.9-1 2.9-1 1.2 0 2 .8 3.2.8 1.1 0 1.8-.8 3.3-.8.9 0 2.2.4 3 1.3-2.6 1.4-2.2 5.2 1 5.7z" fill="currentColor"/></svg>';
+
+function vAuth(){
+  const t=state.authTab;
+  return `<div class="wrap"><div class="auth">
+    <div class="auth-side">
+      <p class="eyebrow">Área do assinante</p>
+      <h1 style="margin-top:10px">Entre para continuar de onde parou.</h1>
+      <ul><li>Seu progresso e suas atividades ficam salvos</li><li>A primeira aula de cada curso é liberada com a conta gratuita</li><li>Assinantes baixam todos os aplicativos</li></ul>
+    </div>
+    <div class="auth-card">
+      <div class="seg" role="tablist" style="justify-self:start">
+        <button role="tab" data-act="auth-tab" data-t="entrar" class="${t==='entrar'?'on':''}">Entrar</button>
+        <button role="tab" data-act="auth-tab" data-t="criar" class="${t==='criar'?'on':''}">Criar conta</button>
+      </div>
+      ${t==='recuperar'?`
+        <h2 style="font-size:1.3rem">Recuperar senha</h2>
+        <form id="form-forgot"><label class="f" for="fg-email">E-mail<input class="input" id="fg-email" type="email" autocomplete="email" required></label>
+          <button class="btn btn-dark" type="submit">Enviar link de redefinição</button></form>
+        <button class="link" data-act="auth-tab" data-t="entrar">Voltar para o login</button>`:`
+      <button class="btn prov" data-act="provider" data-p="google"><span class="pi">${GLOGO}</span>Continuar com Google</button>
+      <button class="btn prov" data-act="provider" data-p="apple"><span class="pi">${ALOGO}</span>Continuar com Apple</button>
+      <div class="or">ou com e-mail</div>
+      ${t==='criar'?`
+      <form id="form-signup">
+        <label class="f" for="su-name">Nome<input class="input" id="su-name" autocomplete="name" required></label>
+        <label class="f" for="su-email">E-mail<input class="input" id="su-email" type="email" autocomplete="email" required></label>
+        <label class="f" for="su-pass">Senha <span class="hint">Mínimo de 8 caracteres</span><input class="input" id="su-pass" type="password" autocomplete="new-password" minlength="8" required></label>
+        <button class="btn btn-accent" type="submit">Criar conta</button>
+      </form>`:`
+      <form id="form-login">
+        <label class="f" for="li-email">E-mail<input class="input" id="li-email" type="email" autocomplete="email" required></label>
+        <label class="f" for="li-pass">Senha<input class="input" id="li-pass" type="password" autocomplete="current-password" required></label>
+        <button class="btn btn-dark" type="submit">Entrar</button>
+      </form>
+      <button class="link" data-act="auth-tab" data-t="recuperar">Esqueci a senha</button>`}`}
+      ${state.authErr?`<p class="err" role="alert">${esc(state.authErr)}</p>`:''}
+      ${state.authMsg?`<p class="ok" role="status">${esc(state.authMsg)}</p>`:''}
+      <p class="note">Versão de demonstração: as contas ficam salvas só neste navegador e os botões Google e Apple simulam o retorno do login. Na versão de produção, os três métodos usam um serviço de autenticação real.</p>
+    </div>
+  </div></div>`;
+}
+
+function vPanel(){
+  const s=state.session; const p=prog();
+  const courses=catalog().filter(x=>x.kind==='curso');
+  const started=courses.filter(c=>pct(c)>0||p.last[c.id]);
+  const list=(started.length?started:courses.filter(c=>c.status==='disponivel')).slice(0,6);
+  const apps=catalog().filter(x=>x.kind==='app');
+  const totalDone=Object.keys(p.done).length, acts=Object.keys(p.quiz).length+Object.keys(p.practice).length;
+  return `<div class="wrap">
+    <div class="page-head"><h1>Olá, ${esc((s.name||s.email).split(' ')[0])}</h1><p class="muted">${totalDone} aulas concluídas · ${acts} atividades entregues</p></div>
+    <div class="dash">
+      <div style="display:grid;gap:20px;align-content:start">
+        <div class="panel sub-card">
+          <div><span class="fine">Assinatura</span><h3>${s.sub?`Plano ${PLANS[s.plan]?PLANS[s.plan].name.toLowerCase():''} ativo`:'Conta gratuita'}</h3>
+          <p class="muted">${s.sub?'Todos os cursos e aplicativos liberados.':'Você tem acesso à primeira aula de cada curso.'}</p></div>
+          ${s.sub?'<span class="chip pill-ok">Ativa</span>':'<button class="btn btn-accent" data-act="subscribe">Assine já</button>'}
+        </div>
+        <div class="panel">
+          <h3>${started.length?'Continue de onde parou':'Comece por aqui'}</h3>
+          ${list.map(c=>`<a class="cont" href="#aula-${esc(c.id)}">${cover(c,{noTitle:true,noStatus:true})}
+            <div style="display:grid;gap:6px"><strong>${esc(c.title)}</strong><div class="bar"><i style="width:${pct(c)}%"></i></div><span class="fine num">${pct(c)}% concluído</span></div>
+            <span class="btn btn-sm">${pct(c)>0?'Continuar':'Começar'}</span></a>`).join('')}
+        </div>
+      </div>
+      <div style="display:grid;gap:20px;align-content:start">
+        <div class="panel">
+          <div class="row between"><h3>Seus aplicativos</h3><a class="fine" href="#apps">Ver todos</a></div>
+          ${apps.slice(0,5).map(a=>`<a href="#item-${esc(a.id)}" class="row" style="text-decoration:none;gap:12px"><span class="mini" style="width:40px;height:40px;border-radius:10px">${art(a)}</span><span style="display:grid"><strong>${esc(a.title)}</strong><span class="fine">${a.status==='disponivel'?'Disponível para baixar':'Em breve'}</span></span></a>`).join('')}
+        </div>
+        <div class="panel">
+          <h3>Conta</h3>
+          <p class="fine">E-mail</p><p>${esc(s.email)}</p>
+          <p class="fine">Método de acesso</p><p>${s.provider==='google'?'Conta Google':s.provider==='apple'?'Conta Apple':'E-mail e senha'}</p>
+          <div class="row">${s.sub?'<button class="btn btn-sm" data-act="cancel-sub">Cancelar assinatura</button>':''}<button class="btn btn-sm" data-act="logout">Sair</button></div>
+        </div>
+      </div>
+    </div></div>`;
+}
+
+function vPlayer(cid){
+  const c=byId(cid);
+  if(!c||c.kind!=='curso') return vItem(cid);
+  const fl=flat(c); if(!fl.length) return `<div class="wrap"><div class="page-head"><h1>${esc(c.title)}</h1><p class="muted">Este curso ainda não tem aulas.</p></div></div>`;
+  const p=prog(), s=state.session, sub=s&&s.sub;
+  let cur = fl.find(x=>x.l.id===(state.lesson[cid]||p.last[cid])) || fl[0];
+  const open = x => x.idx===0 || sub;
+  const key = c.id+'/'+cur.l.id;
+  if(open(cur) && p.last[cid]!==cur.l.id){ p.last[cid]=cur.l.id; saveProg(p); }
+  const prev=fl[cur.idx-1], next=fl[cur.idx+1];
+  const pc=pct(c);
+  let stage;
+  if(!open(cur)){
+    stage=`<div class="lock-box">${IC.lock}<h2>Esta aula é para assinantes</h2><p class="muted">Assine para liberar todas as ${fl.length} aulas, as atividades e os aplicativos do catálogo.</p><button class="btn btn-accent btn-lg" data-act="subscribe">Assine já</button></div>`;
+  } else {
+    const l=cur.l, produced = l.content.trim() || isHttps(l.video);
+    stage=`
+      <div class="video">${art(c)}<div class="vin">
+        ${isHttps(l.video)?`<a class="play" href="${esc(l.video)}" target="_blank" rel="noopener" aria-label="Assistir vídeo da aula"><svg width="28" height="28" viewBox="0 0 20 20"><path d="M6 4.5v11l9-5.5z" fill="#1F1402"/></svg></a><span>Assistir vídeo da aula · ${l.min} min</span>`
+          :`<span class="play" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 20 20"><path d="M6 4.5v11l9-5.5z" fill="#1F1402"/></svg></span><span>${produced?'Vídeo em gravação. Acompanhe pelo material abaixo.':'Aula em produção'}</span>`}
+      </div></div>
+      <article class="lesson-body">
+        <span class="fine">${esc(cur.m.title)} · Aula ${cur.idx+1} de ${fl.length}</span>
+        <h1>${esc(l.title)}</h1>
+        ${produced?`<div class="prose">${rich(l.content)}</div>`:`<p class="muted">O conteúdo desta aula está sendo produzido. Ela aparece liberada aqui assim que for publicada.</p>`}
+      </article>
+      ${produced?activity(c,l,key,p):''}
+      <div class="lesson-nav">
+        ${prev?`<button class="btn" data-act="lesson" data-c="${esc(c.id)}" data-l="${esc(prev.l.id)}">Aula anterior</button>`:'<span></span>'}
+        <div class="row">
+          ${produced&&l.activity.type==='nenhuma'&&!p.done[key]?`<button class="btn btn-dark" data-act="complete" data-k="${esc(key)}">Marcar como concluída</button>`:''}
+          ${p.done[key]?'<span class="chip pill-ok">Aula concluída</span>':''}
+          ${next?`<button class="btn btn-accent" data-act="lesson" data-c="${esc(c.id)}" data-l="${esc(next.l.id)}">Próxima aula</button>`:''}
+        </div>
+      </div>`;
+  }
+  return `<div class="wrap"><div class="player">
+    <aside class="trail" aria-label="Aulas do curso">
+      <div class="trail-head"><a class="fine" href="#item-${esc(c.id)}">Voltar ao curso</a><h2>${esc(c.title)}</h2>
+        <div class="bar"><i style="width:${pc}%"></i></div><span class="fine num">${pc}% concluído</span>
+        ${pc===100?'<span class="chip pill-ok">Certificado liberado</span>':''}</div>
+      <div class="trail-body">${c.modules.map(m=>`<div class="mt">${esc(m.title)}</div>${m.lessons.map(l=>{ const x=fl.find(y=>y.l.id===l.id); const d=p.done[c.id+'/'+l.id];
+        return `<button class="lbtn ${x.l.id===cur.l.id?'on':''}" data-act="lesson" data-c="${esc(c.id)}" data-l="${esc(l.id)}" ${x.l.id===cur.l.id?'aria-current="true"':''}><span class="dot ${d?'done':''} ${!open(x)?'lock':''}">${d?IC.check:!open(x)?IC.lock:''}</span><span>${esc(l.title)}</span><span class="fine num">${l.min}′</span></button>`;}).join('')}`).join('')}</div>
+    </aside>
+    <div class="stage">${stage}</div>
+  </div></div>`;
+}
+
+function activity(c,l,key,p){
+  const a=l.activity;
+  if(a.type==='quiz' && a.questions.length){
+    const ans=state.quiz[key]||{}; const res=state.quizDone[key];
+    return `<section class="activity" aria-label="Atividade">
+      <span class="k">Atividade · questionário</span>
+      ${p.quiz[key]!=null&&!res?`<p class="fine">Sua última nota: <strong class="num">${p.quiz[key]}%</strong>. Você pode refazer.</p>`:''}
+      ${a.questions.map((q,qi)=>`<fieldset class="q"><legend>${qi+1}. ${esc(q.q)}</legend>
+        ${q.opts.map((o,oi)=>{ let cls=''; if(res){ if(oi===q.a) cls='right'; else if(ans[qi]===oi) cls='wrong'; }
+          return `<label class="opt ${cls}"><input type="radio" name="q-${esc(key)}-${qi}" data-quiz="${esc(key)}" data-qi="${qi}" value="${oi}" ${ans[qi]===oi?'checked':''} ${res?'disabled':''}> ${esc(o)}</label>`;}).join('')}
+      </fieldset>`).join('')}
+      ${res?`<p class="${res.score>=70?'ok':'err'}" role="status">Você acertou ${res.right} de ${a.questions.length} (${res.score}%). ${res.score>=70?'Aula concluída.':'É preciso 70% para concluir. Revise o conteúdo e tente de novo.'}</p>
+        <div class="row"><button class="btn" data-act="quiz-retry" data-k="${esc(key)}">Refazer</button></div>`
+        :`<div class="row"><button class="btn btn-dark" data-act="quiz-submit" data-c="${esc(c.id)}" data-l="${esc(l.id)}">Enviar respostas</button></div>`}
+    </section>`;
+  }
+  if(a.type==='pratica'){
+    const sent=p.practice[key]; const draft=state.practiceDraft[key] ?? (sent?sent.text:'');
+    return `<section class="activity" aria-label="Atividade">
+      <span class="k">Atividade prática</span>
+      <p><strong>${esc(a.prompt)}</strong></p>
+      <label class="f" for="pr-${esc(key)}"><span class="hint">Sua resposta fica salva na sua área.</span><textarea class="input" id="pr-${esc(key)}" data-practice="${esc(key)}">${esc(draft)}</textarea></label>
+      <div class="row"><button class="btn btn-dark" data-act="practice-submit" data-k="${esc(key)}">${sent?'Atualizar resposta':'Entregar atividade'}</button>${sent?`<span class="fine">Entregue em ${new Date(sent.at).toLocaleDateString('pt-BR')}</span>`:''}</div>
+    </section>`;
+  }
+  return '';
+}
+
+/* ---------- admin ---------- */
+function vAdmin(){
+  if(state.editing && state.draft) return vEditor();
+  const all=catalog(); const tab=state.adminTab;
+  const st = state.db
+    ? (state.dbStatus==='ok'?['ok','Conectado: alterações publicadas aqui aparecem para todos que abrem a plataforma.']
+      :state.dbStatus==='erro'?['warn','Não foi possível ler o catálogo publicado. Exibindo o conteúdo inicial.']
+      :state.dbStatus==='lento'?['warn','O catálogo publicado ainda não respondeu. O que aparece pode estar desatualizado.']
+      :['','Carregando o catálogo publicado…'])
+    : ['warn','Modo local: as alterações ficam salvas só neste navegador.'];
+  const head=`<div class="page-head"><h1>Área administrativa</h1><p class="muted">Cadastre cursos com módulos, aulas e atividades, e publique os aplicativos para download.</p></div>
+    <div class="status-line ${st[0]}" style="margin-bottom:18px"><span class="sdot"></span>${st[1]}</div>
+    <div class="admin-bar"><div class="seg" role="tablist">
+      ${[['cursos','Cursos (LMS)'],['apps','Aplicativos'],['integracoes','Para produção']].map(([k,l])=>`<button role="tab" data-act="admin-tab" data-t="${k}" class="${tab===k?'on':''}">${l}</button>`).join('')}
+    </div>${tab==='cursos'&&state.canAdmin?'<button class="btn btn-accent" data-act="new" data-kind="curso">Novo curso</button>':tab==='apps'&&state.canAdmin?'<button class="btn btn-accent" data-act="new" data-kind="app">Novo aplicativo</button>':''}</div>
+    ${!state.canAdmin?'<p class="note" style="margin-bottom:14px">Você pode ver o catálogo, mas só editores da plataforma podem alterá-lo.</p>':''}`;
+  if(tab==='integracoes') return `<div class="wrap">${head}${vIntegr()}</div>`;
+  const kind = tab==='apps'?'app':'curso'; const list=all.filter(x=>x.kind===kind);
+  return `<div class="wrap">${head}
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>Título</th><th>Categoria</th><th>Status</th><th>${kind==='curso'?'Conteúdo':'Plataformas'}</th><th>Ideia de</th><th></th></tr></thead>
+      <tbody>${list.map(it=>`<tr>
+        <td><div class="mini">${art(it)}</div></td>
+        <td><strong>${esc(it.title)}</strong><br><span class="fine">${esc(it.tagline)}</span></td>
+        <td>${esc(it.cat)}</td>
+        <td>${it.status==='disponivel'?'<span class="chip pill-ok">Disponível</span>':'<span class="chip pill-soon">Em breve</span>'}</td>
+        <td class="num">${kind==='curso'?`${it.modules.length} módulos · ${flat(it).length} aulas`:(it.platforms.map(p=>PLAT[p]).join(', ')||'—')}</td>
+        <td>${esc(it.author)||'—'}</td>
+        <td><div class="row" style="justify-content:flex-end">${state.canAdmin?`<button class="btn btn-sm" data-act="edit" data-id="${esc(it.id)}">Editar</button><button class="btn btn-sm btn-danger" data-act="del" data-id="${esc(it.id)}">Excluir</button>`:`<a class="btn btn-sm" href="#item-${esc(it.id)}">Ver</a>`}</div></td>
+      </tr>`).join('')||`<tr><td colspan="7" class="muted">Nenhum item cadastrado.</td></tr>`}</tbody>
+    </table></div></div>`;
+}
+
+function vIntegr(){
+  const items=[
+    ['Autenticação','Conectar um serviço de login (por exemplo Firebase Authentication, Supabase Auth ou Auth0) com os três métodos: e-mail e senha, Google e Apple. O login com Apple exige conta no Apple Developer Program e domínio verificado.'],
+    ['Assinaturas e pagamentos','Gateway com cobrança recorrente, Pix e cartão (por exemplo Stripe, Mercado Pago ou Pagar.me), com webhook que ativa e cancela o acesso automaticamente.'],
+    ['Hospedagem dos vídeos','Player com proteção contra download e controle de acesso por assinante (por exemplo Panda Video, Vimeo ou Bunny Stream). O campo “Link do vídeo” de cada aula já aceita o endereço.'],
+    ['Banco de dados de alunos','Progresso, notas e atividades por aluno no servidor. Nesta versão base, o progresso fica salvo no navegador do aluno.'],
+    ['Lojas de aplicativos','Contas de desenvolvedor na Google Play e na App Store. Cole os links publicados no cadastro de cada aplicativo para liberar o botão de download.'],
+    ['Domínio e jurídico','Domínio próprio, termos de uso, política de privacidade (LGPD) e política de reembolso antes de abrir as vendas.']
+  ];
+  return `<ol class="steps-list">${items.map(([t,d],i)=>`<li><strong>${i+1}. ${t}</strong><span class="muted">${d}</span></li>`).join('')}</ol>`;
+}
+
+function quizToText(qs){ return (qs||[]).map(q=>[q.q,...q.opts.map((o,i)=>(i===q.a?'*':'')+o)].join('\n')).join('\n\n'); }
+function textToQuiz(t){
+  return String(t||'').split(/\n\s*\n/).map(b=>b.split('\n').map(s=>s.trim()).filter(Boolean)).filter(ls=>ls.length>=3).map(ls=>{
+    const opts=ls.slice(1); let a=opts.findIndex(o=>o.startsWith('*')); if(a<0) a=0;
+    return {q:ls[0], opts:opts.map(o=>o.replace(/^\*\s*/,'')), a};
+  });
+}
+
+function startEdit(it){
+  const d = clone(it);
+  d.modules.forEach(m=>m.lessons.forEach(l=>{ l.activity.quizText = quizToText(l.activity.questions); }));
+  state.draft=d; state.editing=true; render();
+}
+
+function vEditor(){
+  const d=state.draft, isC=d.kind==='curso', courses=catalog().filter(x=>x.kind!==d.kind || true).filter(x=>x.id!==d.id);
+  const fld=(label,path,val,opts={})=>`<label class="f ${opts.full?'full':''}" for="ed-${path}">${label}${opts.hint?` <span class="hint">${opts.hint}</span>`:''}
+     ${opts.area?`<textarea class="input" id="ed-${path}" data-f="${path}" ${opts.rows?`style="min-height:${opts.rows}px"`:''}>${esc(val)}</textarea>`
+       :`<input class="input" id="ed-${path}" data-f="${path}" value="${esc(val)}" ${opts.type?`type="${opts.type}"`:''} ${opts.ph?`placeholder="${esc(opts.ph)}"`:''}>`}</label>`;
+  return `<div class="wrap editor">
+    <div class="page-head" style="padding-bottom:0"><span class="fine">${d._new?'Novo':'Editar'} ${isC?'curso':'aplicativo'}</span><h1>${esc(d.title||'Sem título')}</h1></div>
+    <div class="panel"><div class="form-grid">
+      ${fld('Título','title',d.title)}
+      ${fld('Categoria','cat',d.cat,{ph:'Ex.: Saúde e segurança'})}
+      ${fld('Chamada curta','tagline',d.tagline,{full:true,hint:'Aparece no card do catálogo'})}
+      ${fld('Descrição','desc',d.desc,{full:true,area:true})}
+      ${fld('Como o assinante lucra','earn',d.earn,{full:true,area:true,rows:80,hint:'A promessa de ganho, mostrada em destaque'})}
+      <label class="f" for="ed-status">Status<select class="input" id="ed-status" data-f="status" style="width:100%"><option value="disponivel" ${d.status==='disponivel'?'selected':''}>Disponível</option><option value="em-breve" ${d.status!=='disponivel'?'selected':''}>Em breve</option></select></label>
+      ${fld('Autor da ideia','author',d.author)}
+      ${fld('Ordem no catálogo','order',d.order,{type:'number'})}
+      <label class="f" for="ed-related">${isC?'Aplicativo relacionado':'Curso relacionado'}<select class="input" id="ed-related" data-f="related" style="width:100%"><option value="">Nenhum</option>${catalog().filter(x=>x.kind!==d.kind).map(x=>`<option value="${esc(x.id)}" ${d.related===x.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select></label>
+      <label class="f full" for="ed-hue">Cor da capa<input type="range" min="0" max="359" id="ed-hue" data-f="hue" value="${d.hue}"><div class="hue-prev" id="hue-prev">${art(d)}</div></label>
+    </div></div>
+    ${isC?vEdModules(d):vEdApp(d)}
+    <div class="row between" style="position:sticky;bottom:0;background:var(--bg);padding:14px 0;border-top:1px solid var(--line)">
+      <button class="btn" data-act="cancel-edit">Cancelar</button>
+      <div class="row"><span class="err" id="ed-err" role="alert"></span><button class="btn btn-accent" data-act="save">${state.db?'Publicar':'Salvar'}</button></div>
+    </div>
+  </div>`;
+}
+
+function vEdModules(d){
+  return `<div style="display:grid;gap:14px">
+    <div class="row between"><h2 style="font-size:1.4rem">Módulos e aulas</h2><button class="btn" data-act="add-mod">Adicionar módulo</button></div>
+    <p class="fine">Questionário: escreva a pergunta na primeira linha e uma alternativa por linha, marcando a correta com *. Separe as perguntas com uma linha em branco. Texto da aula: deixe uma linha em branco entre parágrafos e comece itens de lista com “- ”.</p>
+    ${d.modules.map((m,mi)=>`<div class="ed-mod">
+      <div class="row between"><label class="f" style="flex:1" for="ed-m${mi}">Módulo ${mi+1}<input class="input" id="ed-m${mi}" data-f="modules.${mi}.title" value="${esc(m.title)}"></label>
+        <button class="btn btn-sm btn-danger" data-act="rm-mod" data-mi="${mi}" style="align-self:end">Remover módulo</button></div>
+      ${m.lessons.map((l,li)=>{ const P=`modules.${mi}.lessons.${li}`; return `<div class="ed-les">
+        <div class="row between"><strong>Aula ${li+1}</strong><button class="btn btn-sm btn-danger" data-act="rm-les" data-mi="${mi}" data-li="${li}">Remover aula</button></div>
+        <div class="form-grid">
+          <label class="f" for="ed-${P}-t">Título<input class="input" id="ed-${P}-t" data-f="${P}.title" value="${esc(l.title)}"></label>
+          <label class="f" for="ed-${P}-m">Duração (min)<input class="input" type="number" min="0" id="ed-${P}-m" data-f="${P}.min" value="${l.min}"></label>
+          <label class="f full" for="ed-${P}-v">Link do vídeo <span class="hint">https://, do serviço de hospedagem</span><input class="input" id="ed-${P}-v" data-f="${P}.video" value="${esc(l.video)}" placeholder="https://"></label>
+          <label class="f full" for="ed-${P}-c">Texto da aula<textarea class="input" id="ed-${P}-c" data-f="${P}.content">${esc(l.content)}</textarea></label>
+          <label class="f" for="ed-${P}-a">Atividade<select class="input" style="width:100%" id="ed-${P}-a" data-f="${P}.activity.type" data-rerender="1">
+            <option value="nenhuma" ${l.activity.type==='nenhuma'?'selected':''}>Sem atividade</option>
+            <option value="quiz" ${l.activity.type==='quiz'?'selected':''}>Questionário</option>
+            <option value="pratica" ${l.activity.type==='pratica'?'selected':''}>Atividade prática (resposta escrita)</option></select></label>
+          ${l.activity.type==='quiz'?`<label class="f full" for="ed-${P}-q">Perguntas<textarea class="input" id="ed-${P}-q" data-f="${P}.activity.quizText" style="min-height:150px" placeholder="Qual o ritmo das compressões?&#10;60 a 80 por minuto&#10;*100 a 120 por minuto&#10;150 a 180 por minuto">${esc(l.activity.quizText||'')}</textarea></label>`:''}
+          ${l.activity.type==='pratica'?`<label class="f full" for="ed-${P}-p">Enunciado<textarea class="input" id="ed-${P}-p" data-f="${P}.activity.prompt" style="min-height:70px">${esc(l.activity.prompt)}</textarea></label>`:''}
+        </div></div>`;}).join('')}
+      <button class="btn btn-sm" data-act="add-les" data-mi="${mi}" style="justify-self:start">Adicionar aula</button>
+    </div>`).join('')}
+  </div>`;
+}
+
+function vEdApp(d){
+  return `<div class="panel" style="display:grid;gap:14px">
+    <h2 style="font-size:1.4rem">Downloads</h2>
+    <div class="row">${Object.entries(PLAT).map(([k,l])=>`<label class="row" style="gap:6px"><input type="checkbox" data-plat="${k}" ${d.platforms.includes(k)?'checked':''}> ${l}</label>`).join('')}</div>
+    <div class="form-grid">${d.platforms.map(k=>`<label class="f" for="ed-link-${k}">Link ${PLAT[k]}<input class="input" id="ed-link-${k}" data-f="links.${k}" value="${esc(d.links[k]||'')}" placeholder="https://"></label>`).join('')}
+      <label class="f" for="ed-version">Versão<input class="input" id="ed-version" data-f="version" value="${esc(d.version)}" placeholder="1.0.0"></label>
+      <label class="row" style="gap:8px;align-self:end"><input type="checkbox" data-f="free" ${d.free?'checked':''}> Gratuito para todos (sem assinatura)</label>
+    </div>
+    <p class="fine">O botão de download só aparece quando o status é “Disponível” e o link começa com https://.</p>
+  </div>`;
+}
+
+function setPath(obj,path,val){
+  const ks=path.split('.'); let o=obj;
+  for(let i=0;i<ks.length-1;i++){ const k=/^\d+$/.test(ks[i])?+ks[i]:ks[i]; if(o[k]==null) o[k]={}; o=o[k]; }
+  o[ks[ks.length-1]]=val;
+}
+
+async function saveDraft(){
+  const d=clone(state.draft); const err=$('#ed-err');
+  if(!d.title.trim()){ err.textContent='Dê um título antes de salvar.'; return; }
+  for(const k of Object.keys(d.links||{})){ if(d.links[k] && !isHttps(d.links[k])){ err.textContent=`O link ${PLAT[k]} precisa começar com https://.`; return; } }
+  for(const m of d.modules||[]) for(const l of m.lessons){
+    if(l.video && !isHttps(l.video)){ err.textContent=`O vídeo da aula “${l.title}” precisa começar com https://.`; return; }
+    if(l.activity.type==='quiz'){ l.activity.questions=textToQuiz(l.activity.quizText); if(!l.activity.questions.length){ err.textContent=`O questionário da aula “${l.title}” precisa de ao menos uma pergunta com duas alternativas.`; return; } }
+    delete l.activity.quizText;
+  }
+  if(d._new){ let id=slug(d.title), n=2; while(byId(id)) id=slug(d.title)+'-'+(n++); d.id=id; }
+  delete d._new; d.updatedAt=Date.now();
+  const body=clone(normalize(d)); body.updatedAt=d.updatedAt;
+  const ok = await writeItem(body.id, body);
+  if(!ok){ err.textContent='Não foi possível publicar. Verifique se você tem permissão de editor e tente de novo.'; return; }
+  state.editing=false; state.draft=null; toast(state.db?'Publicado no catálogo':'Salvo neste navegador'); render();
+}
+async function writeItem(id, body){
+  if(state.db){
+    try{ await state.db.collection('catalog').doc(id).set(body); state.overrides=Object.assign({},state.overrides,{[id]:body}); return true; }
+    catch(e){ if(e&&e.code==='unavailable'){ try{ await new Promise(r=>setTimeout(r,800+Math.random()*600)); await state.db.collection('catalog').doc(id).set(body); return true; }catch(e2){} } return false; }
+  }
+  state.localOverrides[id]=body; S.set('alv.local',state.localOverrides); return true;
+}
+
+/* ---------- auth ---------- */
+async function hash(s){
+  try{ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('alv:'+s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+  catch(e){ let h=0; for(const c of s){ h=(h*31+c.charCodeAt(0))|0; } return 'h'+h; }
+}
+const accounts = () => S.get('alv.accounts',{});
+function setSession(acc){
+  state.session={email:acc.email,name:acc.name,provider:acc.provider,sub:!!acc.sub,plan:acc.plan||null};
+  S.set('alv.session',state.session);
+}
+function saveAccount(patch){
+  const all=accounts(); const e=state.session.email; all[e]=Object.assign({},all[e]||{},patch); S.set('alv.accounts',all);
+  Object.assign(state.session,patch); S.set('alv.session',state.session);
+}
+function afterLogin(){
+  state.authErr=''; state.authMsg='';
+  const to=state.after||'painel'; state.after=null;
+  if(to==='checkout'){ go('painel'); openCheckout(state.pendingPlan); } else go(to);
+}
+
+/* ---------- modais ---------- */
+function openModal(html){ $('#modal-root').innerHTML=`<div class="overlay" data-act="modal-bg"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`; const f=$('#modal-root input, #modal-root button'); if(f) f.focus(); }
+function closeModal(){ $('#modal-root').innerHTML=''; }
+function openCheckout(plan){
+  plan = PLANS[plan]?plan:'anual';
+  openModal(`<h2>Assinar a Alavanca</h2>
+    <div class="plan-pick">${Object.values(PLANS).map(p=>`<label><input type="radio" name="plan" value="${p.id}" ${p.id===plan?'checked':''}><span style="flex:1"><strong>${p.name}</strong><br><span class="fine">${p.note}</span></span><strong class="num">${p.price}<span class="fine">${p.per}</span></strong></label>`).join('')}</div>
+    <p class="note">Demonstração: nenhuma cobrança é feita. Na versão de produção, este passo abre o pagamento com Pix ou cartão.</p>
+    <div class="row between"><button class="btn" data-act="modal-close">Agora não</button><button class="btn btn-accent" data-act="confirm-sub">Confirmar assinatura</button></div>`);
+}
+function openProvider(p){
+  const name=p==='google'?'Google':'Apple';
+  openModal(`<h2>Continuar com ${name}</h2>
+    <p class="muted">Simulação do retorno do login ${name}. Na versão de produção, aqui abre a janela oficial do ${name}.</p>
+    <form id="form-provider" data-p="${p}" style="display:grid;gap:12px">
+      <label class="f" for="pv-name">Nome<input class="input" id="pv-name" autocomplete="name" required></label>
+      <label class="f" for="pv-email">E-mail da conta ${name}<input class="input" id="pv-email" type="email" autocomplete="email" required></label>
+      <div class="row between"><button type="button" class="btn" data-act="modal-close">Cancelar</button><button class="btn btn-dark" type="submit">Continuar</button></div>
+    </form>`);
+}
+let toastT;
+function toast(msg){ clearTimeout(toastT); let t=$('.toast'); if(!t){ t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); document.body.appendChild(t);} t.textContent=msg; toastT=setTimeout(()=>t.remove(),2600); }
+
+/* ---------- roteamento ---------- */
+function go(h){ if(location.hash==='#'+h) render(true); else location.hash=h; }
+function viewName(){ return (location.hash.slice(1)||'inicio'); }
+let lastView='';
+function render(scroll){
+  const h=viewName(); let view=h, html;
+  if(h.startsWith('item-')){ view='catalogo'; html=vItem(h.slice(5)); }
+  else if(h.startsWith('aula-')){
+    view='catalogo';
+    if(!state.session){ state.after=h; state.authTab='criar'; state.authMsg='Crie uma conta gratuita para assistir à aula.'; location.hash='entrar'; return; }
+    html=vPlayer(h.slice(5));
+  }
+  else if(h==='catalogo') html=vCatalog();
+  else if(h==='apps') html=vApps();
+  else if(h==='planos'){ html=`<div class="wrap"><div class="page-head"><h1>Planos</h1><p class="muted">Aqui não te ensinamos apenas como fazer: te damos as ferramentas para ganhar dinheiro com o que você aprendeu.</p></div></div>`+vPlansBlock(); }
+  else if(h==='entrar'){ if(state.session){ location.hash='painel'; return; } html=vAuth(); }
+  else if(h==='painel'){ if(!state.session){ state.after='painel'; location.hash='entrar'; return; } html=vPanel(); }
+  else if(h==='admin') html=vAdmin();
+  else { view='inicio'; html=vHome(); }
+  renderTop(view);
+  $('#app').innerHTML=html;
+  if(scroll || lastView!==h){ window.scrollTo(0,0); }
+  lastView=h;
+}
+window.addEventListener('hashchange',()=>{ state.navOpen=false; if(!viewName().startsWith('aula-')) state.quizDone={}; render(); });
+
+function safeRender(){
+  if(state.editing){ return; }
+  const a=document.activeElement; const id=a&&a.id; const pos=a&&a.selectionStart;
+  render();
+  if(id){ const el=document.getElementById(id); if(el){ el.focus(); try{ if(pos!=null) el.setSelectionRange(pos,pos);}catch(e){} } }
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener('click', async e=>{
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const a=t.dataset.act;
+  if(a==='modal-bg'){ if(e.target===t) closeModal(); return; }
+  if(a==='modal-close'){ closeModal(); return; }
+  if(a==='menu'){ state.navOpen=!state.navOpen; renderTop(''); return; }
+  if(a==='subscribe'){
+    state.pendingPlan=t.dataset.plan||'anual';
+    if(!state.session){ state.after='checkout'; state.authTab='criar'; state.authMsg='Crie sua conta para concluir a assinatura.'; go('entrar'); return; }
+    if(state.session.sub){ toast('Sua assinatura já está ativa'); return; }
+    openCheckout(state.pendingPlan); return;
+  }
+  if(a==='confirm-sub'){ const p=(document.querySelector('input[name="plan"]:checked')||{}).value||'anual'; saveAccount({sub:true,plan:p}); closeModal(); toast('Assinatura ativa. Tudo liberado!'); render(); return; }
+  if(a==='cancel-sub'){ openModal(`<h2>Cancelar assinatura?</h2><p class="muted">Você perde o acesso às aulas para assinantes e aos downloads. Seu progresso continua salvo.</p><div class="row between"><button class="btn" data-act="modal-close">Manter assinatura</button><button class="btn btn-danger" data-act="confirm-cancel">Cancelar assinatura</button></div>`); return; }
+  if(a==='confirm-cancel'){ saveAccount({sub:false,plan:null}); closeModal(); toast('Assinatura cancelada'); render(); return; }
+  if(a==='need-sub'){ toast('Downloads liberados para assinantes'); state.pendingPlan='anual'; if(!state.session){ state.after='checkout'; state.authTab='criar'; go('entrar'); } else openCheckout('anual'); return; }
+  if(a==='logout'){ state.session=null; S.set('alv.session',null); toast('Você saiu da conta'); go('inicio'); return; }
+  if(a==='kind'){ state.filter.kind=t.dataset.k; render(); return; }
+  if(a==='notify'){ const id=t.dataset.id; state.notify[id]=!state.notify[id]; S.set('alv.notify',state.notify); toast(state.notify[id]?'Vamos te avisar no lançamento':'Aviso removido'); render(); return; }
+  if(a==='auth-tab'){ state.authTab=t.dataset.t; state.authErr=''; state.authMsg=''; render(); return; }
+  if(a==='provider'){ openProvider(t.dataset.p); return; }
+  if(a==='lesson'){ state.lesson[t.dataset.c]=t.dataset.l; state.quizDone={}; render(true); return; }
+  if(a==='complete'){ const p=prog(); p.done[t.dataset.k]=true; saveProg(p); toast('Aula concluída'); render(); return; }
+  if(a==='quiz-submit'){
+    const c=byId(t.dataset.c); const l=flat(c).find(x=>x.l.id===t.dataset.l).l; const key=c.id+'/'+l.id;
+    const ans=state.quiz[key]||{}; const qs=l.activity.questions;
+    if(Object.keys(ans).length<qs.length){ toast('Responda todas as perguntas antes de enviar'); return; }
+    const right=qs.filter((q,i)=>ans[i]===q.a).length, score=Math.round(100*right/qs.length);
+    state.quizDone[key]={right,score};
+    const p=prog(); p.quiz[key]=score; if(score>=70) p.done[key]=true; saveProg(p); render(); return;
+  }
+  if(a==='quiz-retry'){ delete state.quizDone[t.dataset.k]; delete state.quiz[t.dataset.k]; render(); return; }
+  if(a==='practice-submit'){
+    const k=t.dataset.k; const el=document.querySelector(`[data-practice="${CSS.escape(k)}"]`); const txt=(el?el.value:'').trim();
+    if(txt.length<10){ toast('Escreva uma resposta um pouco mais completa'); return; }
+    const p=prog(); p.practice[k]={text:txt,at:Date.now()}; p.done[k]=true; saveProg(p); delete state.practiceDraft[k]; toast('Atividade entregue'); render(); return;
+  }
+  /* admin */
+  if(a==='admin-tab'){ state.adminTab=t.dataset.t; render(); return; }
+  if(a==='new'){ const k=t.dataset.kind; startEdit(normalize({_new:true,id:'',kind:k,title:'',status:'em-breve',hue:Math.floor(Math.random()*360),order:k==='curso'?9:30,
+      modules:k==='curso'?[{id:rid('m'),title:'Módulo 1',lessons:[{id:rid('l'),title:'Aula 1',min:5,video:'',content:'',activity:{type:'nenhuma'}}]}]:[],platforms:k==='app'?['android','ios']:[]})); state.draft._new=true; return; }
+  if(a==='edit'){ const it=byId(t.dataset.id); if(it) startEdit(it); return; }
+  if(a==='del'){ const it=byId(t.dataset.id); openModal(`<h2>Excluir “${esc(it.title)}”?</h2><p class="muted">O item sai do catálogo para todos os assinantes. O progresso já salvo pelos alunos não é apagado.</p><div class="row between"><button class="btn" data-act="modal-close">Manter</button><button class="btn btn-danger" data-act="confirm-del" data-id="${esc(it.id)}">Excluir</button></div>`); return; }
+  if(a==='confirm-del'){ const id=t.dataset.id; const ok=await writeItem(id,{id,deleted:true,updatedAt:Date.now()}); closeModal(); toast(ok?'Item excluído':'Não foi possível excluir. Verifique sua permissão.'); render(); return; }
+  if(a==='cancel-edit'){ state.editing=false; state.draft=null; render(); return; }
+  if(a==='save'){ t.disabled=true; await saveDraft(); t.disabled=false; return; }
+  if(a==='add-mod'){ state.draft.modules.push({id:rid('m'),title:'Módulo '+(state.draft.modules.length+1),lessons:[]}); render(); return; }
+  if(a==='rm-mod'){ state.draft.modules.splice(+t.dataset.mi,1); render(); return; }
+  if(a==='add-les'){ const m=state.draft.modules[+t.dataset.mi]; m.lessons.push({id:rid('l'),title:'Aula '+(m.lessons.length+1),min:5,video:'',content:'',activity:{type:'nenhuma',questions:[],prompt:'',quizText:''}}); render(); return; }
+  if(a==='rm-les'){ state.draft.modules[+t.dataset.mi].lessons.splice(+t.dataset.li,1); render(); return; }
+});
+
+document.addEventListener('input', e=>{
+  const t=e.target;
+  if(t.id==='f-q'){ state.filter.q=t.value; const pos=t.selectionStart; render(); const n=$('#f-q'); n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){} return; }
+  if(t.dataset.practice){ state.practiceDraft[t.dataset.practice]=t.value; return; }
+  if(t.dataset.f && state.draft && t.type!=='checkbox'){
+    let v=t.value; const last=t.dataset.f.split('.').pop();
+    if(['hue','min','order'].includes(last)) v=+v||0;
+    setPath(state.draft,t.dataset.f,v);
+    if(last==='hue'){ $('#hue-prev').innerHTML=art(state.draft); }
+  }
+});
+document.addEventListener('change', e=>{
+  const t=e.target;
+  if(t.id==='f-cat'){ state.filter.cat=t.value; render(); return; }
+  if(t.dataset.quiz){ const k=t.dataset.quiz; state.quiz[k]=Object.assign({},state.quiz[k],{[t.dataset.qi]:+t.value}); return; }
+  if(t.dataset.plat && state.draft){ const s=new Set(state.draft.platforms); t.checked?s.add(t.dataset.plat):s.delete(t.dataset.plat); state.draft.platforms=Object.keys(PLAT).filter(p=>s.has(p)); render(); return; }
+  if(t.dataset.f==='free' && state.draft){ state.draft.free=t.checked; return; }
+  if(t.dataset.f && state.draft){ setPath(state.draft,t.dataset.f,t.value); if(t.dataset.rerender) render(); }
+});
+document.addEventListener('submit', async e=>{
+  e.preventDefault(); const f=e.target;
+  if(f.id==='form-login'){
+    const email=$('#li-email').value.trim().toLowerCase(), pass=$('#li-pass').value; const acc=accounts()[email];
+    if(!acc || acc.pass!==await hash(pass)){ state.authErr=acc&&!acc.pass?`Esta conta usa login com ${acc.provider==='google'?'Google':'Apple'}. Use o botão acima.`:'E-mail ou senha incorretos.'; state.authMsg=''; render(); return; }
+    setSession(acc); toast('Bem-vindo de volta'); afterLogin(); return;
+  }
+  if(f.id==='form-signup'){
+    const name=$('#su-name').value.trim(), email=$('#su-email').value.trim().toLowerCase(), pass=$('#su-pass').value;
+    if(pass.length<8){ state.authErr='A senha precisa ter pelo menos 8 caracteres.'; render(); return; }
+    const all=accounts(); if(all[email]){ state.authErr='Já existe uma conta com este e-mail. Entre ou use “Esqueci a senha”.'; state.authMsg=''; render(); return; }
+    all[email]={email,name,provider:'email',pass:await hash(pass),sub:false,created:Date.now()}; S.set('alv.accounts',all);
+    setSession(all[email]); toast('Conta criada'); afterLogin(); return;
+  }
+  if(f.id==='form-forgot'){ state.authErr=''; state.authMsg='Se houver uma conta com esse e-mail, enviaremos um link para criar uma nova senha. Na demonstração, nenhum e-mail é enviado.'; render(); return; }
+  if(f.id==='form-provider'){
+    const p=f.dataset.p, name=$('#pv-name').value.trim(), email=$('#pv-email').value.trim().toLowerCase();
+    const all=accounts(); all[email]=Object.assign({email,name,provider:p,sub:false,created:Date.now()},all[email]||{},{provider:all[email]&&all[email].pass?all[email].provider:p});
+    if(!all[email].name) all[email].name=name; S.set('alv.accounts',all);
+    closeModal(); setSession(all[email]); toast('Conectado com '+(p==='google'?'Google':'Apple')); afterLogin(); return;
+  }
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && $('#modal-root').innerHTML) closeModal(); });
+
+/* ---------- catálogo compartilhado (db) ---------- */
+(async()=>{
+  if(!window.claude || typeof window.claude.use!=='function') return;
+  try{
+    const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+    if(!db) return;
+    state.db=db; state.user=user; state.dbStatus='carregando';
+    if(user){ try{ state.canAdmin=!!(await user.canEdit()); }catch(e){ state.canAdmin=true; } } else state.canAdmin=true;
+    const timer=setTimeout(()=>{ if(state.dbStatus==='carregando'){ state.dbStatus='lento'; safeRender(); } },10000);
+    db.collection('catalog').onSnapshot(snap=>{
+      const o={}; snap.docs.forEach(d=>{ if(d.exists){ const v=d.data(); if(v&&typeof v==='object') o[d.id]=v; } });
+      state.overrides=o;
+      if(!snap.metadata.fromCache){ clearTimeout(timer); state.dbStatus='ok'; }
+      safeRender();
+    }, err=>{ clearTimeout(timer); state.dbStatus='erro'; safeRender(); });
+    safeRender();
+  }catch(e){}
+})();
+
+render();
+</script>
+</body>
+</html>
